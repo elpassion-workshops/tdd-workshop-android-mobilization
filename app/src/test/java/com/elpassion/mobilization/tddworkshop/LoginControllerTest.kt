@@ -8,17 +8,18 @@ import org.junit.Test
 class LoginControllerTest {
 
     private val api = mock<Login.Api>()
+    private val controller = LoginController(api)
 
     @Test
     fun shouldCallApiOnLogin() {
-        LoginController(api).login("email")
+        controller.login("email")
         verify(api).login(any())
     }
 
     @Test
     fun shouldCallApiWithProvidedEmail() {
         val specificEmail = "specificEmail"
-        LoginController(api).login(specificEmail)
+        controller.login(specificEmail)
         verify(api).login(specificEmail)
     }
 }
