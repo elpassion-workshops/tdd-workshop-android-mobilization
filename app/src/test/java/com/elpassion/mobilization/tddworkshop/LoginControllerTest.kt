@@ -1,9 +1,6 @@
 package com.elpassion.mobilization.tddworkshop
 
-import com.nhaarman.mockito_kotlin.any
-import com.nhaarman.mockito_kotlin.mock
-import com.nhaarman.mockito_kotlin.never
-import com.nhaarman.mockito_kotlin.verify
+import com.nhaarman.mockito_kotlin.*
 import org.junit.Test
 
 class LoginControllerTest {
@@ -14,37 +11,44 @@ class LoginControllerTest {
     @Test
     fun shouldCallApiOnLogin() {
         login()
-        verify(api).login(any())
+        verify(api).login(any(), any())
     }
 
     @Test
     fun shouldCallApiWithProvidedEmail() {
         val specificEmail = "specificEmail"
-        login(specificEmail)
-        verify(api).login(specificEmail)
+        login(email = specificEmail)
+        verify(api).login(eq(specificEmail), any())
     }
 
     @Test
     fun shouldNotCallApiWhenEmailIsEmpty() {
-        login("")
-        verify(api, never()).login(any())
+        login(email = "")
+        verify(api, never()).login(any(), any())
     }
 
-    private fun login(email: String = "email") {
-        controller.login(email)
+    @Test
+    fun shouldCallApiWithProvidedPassword() {
+        val specificPassword = "specificPassword"
+        login(password = specificPassword)
+        verify(api).login(any(), eq(specificPassword))
+    }
+
+    private fun login(email: String = "email", password: String = "password") {
+        controller.login(email, password)
     }
 }
 
 interface Login {
     interface Api {
-        fun login(email: String)
+        fun login(email: String, password: String)
     }
 }
 
 class LoginController(private val api: Login.Api) {
-    fun login(email: String) {
+    fun login(email: String, password: String) {
         if (email.isNotBlank()) {
-            api.login(email)
+            api.login(email, password)
         }
     }
 }
