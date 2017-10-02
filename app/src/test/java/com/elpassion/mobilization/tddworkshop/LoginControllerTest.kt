@@ -2,6 +2,7 @@ package com.elpassion.mobilization.tddworkshop
 
 import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockito_kotlin.never
 import com.nhaarman.mockito_kotlin.verify
 import org.junit.Test
 
@@ -23,6 +24,12 @@ class LoginControllerTest {
         verify(api).login(specificEmail)
     }
 
+    @Test
+    fun shouldNotCallApiWhenEmailIsEmpty() {
+        login("")
+        verify(api, never()).login(any())
+    }
+
     private fun login(email: String = "email") {
         controller.login(email)
     }
@@ -36,6 +43,8 @@ interface Login {
 
 class LoginController(private val api: Login.Api) {
     fun login(email: String) {
-        api.login(email)
+        if (email.isNotBlank()) {
+            api.login(email)
+        }
     }
 }
