@@ -12,15 +12,19 @@ class LoginControllerTest {
 
     @Test
     fun shouldCallApiOnLogin() {
-        controller.login("email")
+        login()
         verify(api).login(any())
     }
 
     @Test
     fun shouldCallApiWithProvidedEmail() {
         val specificEmail = "specificEmail"
-        controller.login(specificEmail)
+        login(specificEmail)
         verify(api).login(specificEmail)
+    }
+
+    private fun login(email: String = "email") {
+        controller.login(email)
     }
 }
 
