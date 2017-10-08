@@ -1,3 +1,5 @@
+@file:Suppress("IllegalIdentifier")
+
 package com.elpassion.mobilization.tddworkshop
 
 import com.nhaarman.mockito_kotlin.mock
@@ -10,12 +12,12 @@ class LoginModelTest {
     private val model = LoginModel(api)
 
     @Test
-    fun shouldStartWithIdleState() {
+    fun `Should start with idle state`() {
         model.states.test().assertLastValue(Login.State(false))
     }
 
     @Test
-    fun shouldCallApiOnLogin() {
+    fun `Should call api on login`() {
         model.events.accept(Login.Event.LoginClicked)
         verify(api).call()
     }
