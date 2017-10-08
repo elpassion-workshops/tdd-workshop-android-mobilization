@@ -29,6 +29,10 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.5'
+    implementation group: 'io.reactivex.rxjava2', name: 'rxkotlin', version: '2.1.0'
+    implementation group: 'io.reactivex.rxjava2', name: 'rxandroid', version: '2.0.1'
+    implementation group: 'com.squareup.retrofit2', name: 'adapter-rxjava2', version: '2.3.0'
     implementation group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: kotlin_version
 
     testImplementation 'junit:junit:4.12'
