@@ -31,14 +31,14 @@ class LoginModelTest {
 
     @Test
     fun `Should not call api with empty login`() {
-        login("")
+        login(email = "")
         verify(api, never()).call(any())
     }
 
     @Test
     fun `Should call api with provided login`() {
-        login("provided login")
-        verify(api).call("provided login")
+        login(email = "provided email")
+        verify(api).call("provided email")
     }
 
     @Test
