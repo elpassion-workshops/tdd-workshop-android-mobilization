@@ -41,14 +41,20 @@ class LoginModelTest {
         verify(api).call("provided login")
     }
 
-    private fun login(login: String = "login") {
-        model.events.accept(Login.Event.LoginClicked(login))
+    @Test
+    fun `Should not call api when password is empty`() {
+        login(password = "")
+        verify(api, never()).call(any())
+    }
+
+    private fun login(login: String = "login", password: String = "password") {
+        model.events.accept(Login.Event.LoginClicked(login, password))
     }
 }
 
 interface Login {
     sealed class Event {
-        class LoginClicked(val login: String) : Event()
+        class LoginClicked(val login: String, val password: String) : Event()
     }
 
     data class State(val loader: Boolean)
@@ -64,6 +70,7 @@ class LoginModel(api: Login.Api) : Model<Login.Event, Login.State>(Login.State(f
             events
                     .ofType(Login.Event.LoginClicked::class.java)
                     .filter { it.login.isNotEmpty() }
+                    .filter { it.password.isNotEmpty() }
                     .map { api.call(it.login) }
                     .map { Login.State(false) }
                     .subscribe(states)
