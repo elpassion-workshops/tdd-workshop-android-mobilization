@@ -21,7 +21,7 @@ class LoginModelTest {
     @Test
     fun `Should call api on login`() {
         login()
-        verify(api).call("login")
+        verify(api).call("email")
     }
 
     @Test
@@ -47,20 +47,20 @@ class LoginModelTest {
         verify(api, never()).call(any())
     }
 
-    private fun login(login: String = "login", password: String = "password") {
-        model.events.accept(Login.Event.LoginClicked(login, password))
+    private fun login(email: String = "email", password: String = "password") {
+        model.events.accept(Login.Event.LoginClicked(email, password))
     }
 }
 
 interface Login {
     sealed class Event {
-        class LoginClicked(val login: String, val password: String) : Event()
+        class LoginClicked(val email: String, val password: String) : Event()
     }
 
     data class State(val loader: Boolean)
 
     interface Api {
-        fun call(login: String)
+        fun call(email: String)
     }
 }
 
@@ -69,9 +69,9 @@ class LoginModel(api: Login.Api) : Model<Login.Event, Login.State>(Login.State(f
     private val disposable =
             events
                     .ofType(Login.Event.LoginClicked::class.java)
-                    .filter { it.login.isNotEmpty() }
+                    .filter { it.email.isNotEmpty() }
                     .filter { it.password.isNotEmpty() }
-                    .map { api.call(it.login) }
+                    .map { api.call(it.email) }
                     .map { Login.State(false) }
                     .subscribe(states)
 
