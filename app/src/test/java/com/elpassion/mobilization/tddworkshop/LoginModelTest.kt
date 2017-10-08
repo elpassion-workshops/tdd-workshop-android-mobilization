@@ -19,7 +19,7 @@ class LoginModelTest {
 
     @Test
     fun `Should call api on login`() {
-        model.events.accept(Login.Event.LoginClicked)
+        model.events.accept(Login.Event.LoginClicked("login"))
         verify(api).call()
     }
 
@@ -27,11 +27,17 @@ class LoginModelTest {
     fun `Should not call api until login`() {
         verify(api, never()).call()
     }
+
+    @Test
+    fun `Should not call api with empty login`() {
+        model.events.accept(Login.Event.LoginClicked(""))
+        verify(api, never()).call()
+    }
 }
 
 interface Login {
     sealed class Event {
-        object LoginClicked : Event()
+        class LoginClicked(val login: String) : Event()
     }
 
     data class State(val loader: Boolean)
@@ -45,6 +51,8 @@ class LoginModel(api: Login.Api) : Model<Login.Event, Login.State>(Login.State(f
 
     private val disposable =
             events
+                    .ofType(Login.Event.LoginClicked::class.java)
+                    .filter { it.login.isNotEmpty() }
                     .map { api.call() }
                     .map { Login.State(false) }
                     .subscribe(states)
