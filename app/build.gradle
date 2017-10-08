@@ -33,6 +33,7 @@ dependencies {
     implementation group: 'io.reactivex.rxjava2', name: 'rxkotlin', version: '2.1.0'
     implementation group: 'io.reactivex.rxjava2', name: 'rxandroid', version: '2.0.1'
     implementation group: 'com.squareup.retrofit2', name: 'adapter-rxjava2', version: '2.3.0'
+    implementation group: 'com.jakewharton.rxrelay2', name: 'rxrelay', version: '2.0.0'
     implementation group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: kotlin_version
 
     testImplementation 'junit:junit:4.12'
