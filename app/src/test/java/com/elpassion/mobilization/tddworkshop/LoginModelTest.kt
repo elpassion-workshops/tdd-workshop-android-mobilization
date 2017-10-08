@@ -1,16 +1,10 @@
 package com.elpassion.mobilization.tddworkshop
 
-import org.junit.Assert
 import org.junit.Test
 
 class LoginModelTest {
 
     private val model = LoginModel()
-
-    @Test
-    fun shouldInitLoginModel() {
-        Assert.assertNotNull(model)
-    }
 
     @Test
     fun shouldStartWithIdleState() {
