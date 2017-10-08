@@ -2,6 +2,7 @@
 
 package com.elpassion.mobilization.tddworkshop
 
+import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.never
 import com.nhaarman.mockito_kotlin.verify
@@ -19,19 +20,29 @@ class LoginModelTest {
 
     @Test
     fun `Should call api on login`() {
-        model.events.accept(Login.Event.LoginClicked("login"))
-        verify(api).call()
+        login()
+        verify(api).call("login")
     }
 
     @Test
     fun `Should not call api until login`() {
-        verify(api, never()).call()
+        verify(api, never()).call(any())
     }
 
     @Test
     fun `Should not call api with empty login`() {
-        model.events.accept(Login.Event.LoginClicked(""))
-        verify(api, never()).call()
+        login("")
+        verify(api, never()).call(any())
+    }
+
+    @Test
+    fun `Should call api with provided login`() {
+        login("provided login")
+        verify(api).call("provided login")
+    }
+
+    private fun login(login: String = "login") {
+        model.events.accept(Login.Event.LoginClicked(login))
     }
 }
 
@@ -43,7 +54,7 @@ interface Login {
     data class State(val loader: Boolean)
 
     interface Api {
-        fun call()
+        fun call(login: String)
     }
 }
 
@@ -53,7 +64,7 @@ class LoginModel(api: Login.Api) : Model<Login.Event, Login.State>(Login.State(f
             events
                     .ofType(Login.Event.LoginClicked::class.java)
                     .filter { it.login.isNotEmpty() }
-                    .map { api.call() }
+                    .map { api.call(it.login) }
                     .map { Login.State(false) }
                     .subscribe(states)
 
