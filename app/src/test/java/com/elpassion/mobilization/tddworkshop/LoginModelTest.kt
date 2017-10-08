@@ -5,14 +5,16 @@ import org.junit.Test
 
 class LoginModelTest {
 
+    private val model = LoginModel()
+
     @Test
     fun shouldInitLoginModel() {
-        Assert.assertNotNull(LoginModel())
+        Assert.assertNotNull(model)
     }
 
     @Test
     fun shouldStartWithIdleState() {
-        LoginModel().states.test().assertLastValue(Login.State(false))
+        model.states.test().assertLastValue(Login.State(false))
     }
 }
 
