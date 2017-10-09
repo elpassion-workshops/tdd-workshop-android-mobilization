@@ -13,7 +13,7 @@ class LoginModelTest {
 
     @Test
     fun `Should start with idle state`() {
-        model.states.test().assertLastValue(Login.State(false, false))
+        model.states.test().assertLastValue(Login.State(false, false, false))
     }
 
     @Test
@@ -57,6 +57,12 @@ class LoginModelTest {
         model.states.test().assertLastValueThat { emptyEmailError }
     }
 
+    @Test
+    fun `Should show empty password error`() {
+        login(password = "")
+        model.states.test().assertLastValueThat { emptyPasswordError }
+    }
+
     private fun login(email: String = "email", password: String = "password") {
         model.events.accept(Login.Event.LoginClicked(email, password))
     }
@@ -67,18 +73,21 @@ interface Login {
         class LoginClicked(val email: String, val password: String) : Event()
     }
 
-    data class State(val loader: Boolean, val emptyEmailError: Boolean)
+    data class State(val loader: Boolean, val emptyEmailError: Boolean, val emptyPasswordError: Boolean)
 
     interface Api {
         fun call(email: String, password: String)
     }
 }
 
-class LoginModel(val api: Login.Api) : Model<Login.Event, Login.State>(Login.State(loader = false, emptyEmailError = false)) {
+class LoginModel(private val api: Login.Api) : Model<Login.Event, Login.State>(Login.State(loader = false, emptyEmailError = false, emptyPasswordError = false)) {
 
     init {
-        Observable.merge(loginWithCredentials(),
-                loginWithEmptyEmail()).subscribe(states)
+        Observable.merge(
+                loginWithCredentials(),
+                loginWithEmptyEmail(),
+                loginWithEmptyPassword()
+        ).subscribe(states)
     }
 
     private fun loginWithCredentials(): Observable<Login.State> {
@@ -87,13 +96,19 @@ class LoginModel(val api: Login.Api) : Model<Login.Event, Login.State>(Login.Sta
                 .filter { it.email.isNotEmpty() }
                 .filter { it.password.isNotEmpty() }
                 .map { api.call(it.email, it.password) }
-                .map { Login.State(loader = false, emptyEmailError = true) }
+                .map { Login.State(loader = false, emptyEmailError = true, emptyPasswordError = false) }
     }
 
     private fun loginWithEmptyEmail(): Observable<Login.State> {
         return events.ofType(Login.Event.LoginClicked::class.java)
                 .filter { it.email.isEmpty() }
-                .map { Login.State(loader = false, emptyEmailError = true) }
+                .map { Login.State(loader = false, emptyEmailError = true, emptyPasswordError = false) }
+    }
+
+    private fun loginWithEmptyPassword(): Observable<Login.State> {
+        return events.ofType(Login.Event.LoginClicked::class.java)
+                .filter { it.password.isEmpty() }
+                .map { Login.State(loader = false, emptyEmailError = false, emptyPasswordError = true) }
     }
 
     override fun onCleared() = Unit
