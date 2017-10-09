@@ -63,6 +63,13 @@ class LoginModelTest {
         assertLastState { emptyPasswordError }
     }
 
+    @Test
+    fun `Should remove empty email error after logging when email provided`() {
+        login(email = "")
+        login(email = "email@test.pl")
+        assertLastState { !emptyEmailError }
+    }
+
     private fun login(email: String = "email", password: String = "password") {
         model.events.accept(Login.Event.LoginClicked(email, password))
     }
@@ -100,7 +107,7 @@ class LoginModel(private val api: Login.Api) : Model<Login.Event, Login.State>(L
                 .filter { it.email.isNotEmpty() }
                 .filter { it.password.isNotEmpty() }
                 .map { api.call(it.email, it.password) }
-                .map { Login.State(loader = false, emptyEmailError = true, emptyPasswordError = false) }
+                .map { Login.State(loader = false, emptyEmailError = false, emptyPasswordError = false) }
     }
 
     private fun loginWithEmptyEmail(): Observable<Login.State> {
