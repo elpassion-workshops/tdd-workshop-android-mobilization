@@ -20,7 +20,7 @@ class LoginModelTest {
 
     @Test
     fun `Should start with idle state`() {
-        model.states.test().assertLastValue(Login.State(false, false, false))
+        model.states.test().assertLastValue(Login.State(false, false, false, false))
     }
 
     @Test
@@ -90,6 +90,13 @@ class LoginModelTest {
         assertLastState { !loader }
     }
 
+    @Test
+    fun `Should show error when api call fails`() {
+        login()
+        apiSubject.onError(RuntimeException())
+        assertLastState { networkError }
+    }
+
     private fun login(email: String = "email", password: String = "password") {
         model.events.accept(Login.Event.LoginClicked(email, password))
     }
@@ -104,14 +111,14 @@ interface Login {
         class LoginClicked(val email: String, val password: String) : Event()
     }
 
-    data class State(val loader: Boolean, val emptyEmailError: Boolean, val emptyPasswordError: Boolean)
+    data class State(val loader: Boolean, val emptyEmailError: Boolean, val emptyPasswordError: Boolean, val networkError: Boolean)
 
     interface Api {
         fun call(email: String, password: String): Completable
     }
 }
 
-class LoginModel(private val api: Login.Api) : Model<Login.Event, Login.State>(Login.State(loader = false, emptyEmailError = false, emptyPasswordError = false)) {
+class LoginModel(private val api: Login.Api) : Model<Login.Event, Login.State>(Login.State(loader = false, emptyEmailError = false, emptyPasswordError = false, networkError = false)) {
 
     init {
         Observable.merge(
@@ -131,6 +138,7 @@ class LoginModel(private val api: Login.Api) : Model<Login.Event, Login.State>(L
                             .onLatestFrom(states) {
                                 copy(loader = false)
                             }
+                            .onErrorReturn { states.value.copy(networkError = true) }
                             .startWith(Observable.just(states.value.copy(loader = true)))
                 }
     }
