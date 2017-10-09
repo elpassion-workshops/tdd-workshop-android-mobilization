@@ -2,8 +2,10 @@
 
 package com.elpassion.mobilization.tddworkshop
 
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.nhaarman.mockito_kotlin.*
 import io.reactivex.Observable
+import io.reactivex.rxkotlin.withLatestFrom
 import org.junit.Test
 
 class LoginModelTest {
@@ -107,20 +109,27 @@ class LoginModel(private val api: Login.Api) : Model<Login.Event, Login.State>(L
                 .filter { it.email.isNotEmpty() }
                 .filter { it.password.isNotEmpty() }
                 .map { api.call(it.email, it.password) }
-                .map { Login.State(loader = false, emptyEmailError = false, emptyPasswordError = false) }
+                .onLatestFrom(states) {
+                    this
+                }
     }
 
     private fun loginWithEmptyEmail(): Observable<Login.State> {
         return events.ofType(Login.Event.LoginClicked::class.java)
-                .filter { it.email.isEmpty() }
-                .map { Login.State(loader = false, emptyEmailError = true, emptyPasswordError = false) }
+                .onLatestFrom(states) {
+                    copy(emptyEmailError = it.email.isEmpty())
+                }
     }
 
     private fun loginWithEmptyPassword(): Observable<Login.State> {
         return events.ofType(Login.Event.LoginClicked::class.java)
-                .filter { it.password.isEmpty() }
-                .map { Login.State(loader = false, emptyEmailError = false, emptyPasswordError = true) }
+                .onLatestFrom(states) {
+                    copy(emptyPasswordError = it.password.isEmpty())
+                }
     }
 
     override fun onCleared() = Unit
 }
+
+private fun <T, State> Observable<T>.onLatestFrom(states: BehaviorRelay<State>, action: State.(T) -> State) =
+        withLatestFrom(states, { item, state -> state.action(item) })
