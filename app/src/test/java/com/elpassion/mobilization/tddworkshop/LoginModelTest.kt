@@ -104,6 +104,13 @@ class LoginModelTest {
         assertLastState { !loader }
     }
 
+    @Test
+    fun `Should open home screen after login succeed`() {
+        login()
+        apiSubject.onComplete()
+        model.actions.test().assertLastValue(Login.Action.OpenHomeScreen)
+    }
+
     private fun login(email: String = "email", password: String = "password") {
         model.events.accept(Login.Event.LoginClicked(email, password))
     }
@@ -120,12 +127,16 @@ interface Login {
 
     data class State(val loader: Boolean, val emptyEmailError: Boolean, val emptyPasswordError: Boolean, val networkError: Boolean)
 
+    sealed class Action {
+        object OpenHomeScreen : Action()
+    }
+
     interface Api {
         fun call(email: String, password: String): Completable
     }
 }
 
-class LoginModel(private val api: Login.Api) : Model<Login.Event, Login.State>(Login.State(loader = false, emptyEmailError = false, emptyPasswordError = false, networkError = false)) {
+class LoginModel(private val api: Login.Api) : Model<Login.Event, Login.State, Login.Action>(Login.State(loader = false, emptyEmailError = false, emptyPasswordError = false, networkError = false)) {
 
     init {
         Observable.merge(
@@ -147,6 +158,7 @@ class LoginModel(private val api: Login.Api) : Model<Login.Event, Login.State>(L
                             }
                             .onErrorReturn { states.value.copy(networkError = true, loader = false) }
                             .startWith(Observable.just(states.value.copy(loader = true)))
+                            .doOnNext { actions.accept(Login.Action.OpenHomeScreen) }
                 }
     }
 
