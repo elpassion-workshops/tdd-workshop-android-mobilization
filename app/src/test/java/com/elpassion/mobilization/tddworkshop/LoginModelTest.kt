@@ -3,6 +3,7 @@
 package com.elpassion.mobilization.tddworkshop
 
 import com.nhaarman.mockito_kotlin.*
+import io.reactivex.Observable
 import org.junit.Test
 
 class LoginModelTest {
@@ -12,7 +13,7 @@ class LoginModelTest {
 
     @Test
     fun `Should start with idle state`() {
-        model.states.test().assertLastValue(Login.State(false))
+        model.states.test().assertLastValue(Login.State(false, false))
     }
 
     @Test
@@ -50,6 +51,12 @@ class LoginModelTest {
         verify(api).call(any(), eq("provided password"))
     }
 
+    @Test
+    fun `Should show empty email error`() {
+        login(email = "")
+        model.states.test().assertLastValueThat { emptyEmailError }
+    }
+
     private fun login(email: String = "email", password: String = "password") {
         model.events.accept(Login.Event.LoginClicked(email, password))
     }
@@ -60,23 +67,33 @@ interface Login {
         class LoginClicked(val email: String, val password: String) : Event()
     }
 
-    data class State(val loader: Boolean)
+    data class State(val loader: Boolean, val emptyEmailError: Boolean)
 
     interface Api {
         fun call(email: String, password: String)
     }
 }
 
-class LoginModel(api: Login.Api) : Model<Login.Event, Login.State>(Login.State(false)) {
+class LoginModel(val api: Login.Api) : Model<Login.Event, Login.State>(Login.State(loader = false, emptyEmailError = false)) {
 
     private val disposable =
-            events
-                    .ofType(Login.Event.LoginClicked::class.java)
-                    .filter { it.email.isNotEmpty() }
-                    .filter { it.password.isNotEmpty() }
-                    .map { api.call(it.email, it.password) }
-                    .map { Login.State(false) }
-                    .subscribe(states)
+            Observable.merge(loginWithCredentials(),
+                    loginWithEmptyEmail()).subscribe(states)
+
+    private fun loginWithCredentials(): Observable<Login.State> {
+        return events
+                .ofType(Login.Event.LoginClicked::class.java)
+                .filter { it.email.isNotEmpty() }
+                .filter { it.password.isNotEmpty() }
+                .map { api.call(it.email, it.password) }
+                .map { Login.State(loader = false, emptyEmailError = true) }
+    }
+
+    private fun loginWithEmptyEmail(): Observable<Login.State> {
+        return events.ofType(Login.Event.LoginClicked::class.java)
+                .filter { it.email.isEmpty() }
+                .map { Login.State(loader = false, emptyEmailError = true) }
+    }
 
     override fun onCleared() = Unit
 }
