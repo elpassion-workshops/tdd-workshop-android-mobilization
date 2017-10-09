@@ -4,13 +4,18 @@ package com.elpassion.mobilization.tddworkshop
 
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.nhaarman.mockito_kotlin.*
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.withLatestFrom
+import io.reactivex.subjects.CompletableSubject
 import org.junit.Test
 
 class LoginModelTest {
 
-    private val api = mock<Login.Api>()
+    private val apiSubject = CompletableSubject.create()
+    private val api = mock<Login.Api> {
+        on { call(any(), any()) } doReturn apiSubject
+    }
     private val model = LoginModel(api)
 
     @Test
@@ -78,6 +83,13 @@ class LoginModelTest {
         assertLastState { loader }
     }
 
+    @Test
+    fun `Should hide loader after api call`() {
+        login()
+        apiSubject.onComplete()
+        assertLastState { !loader }
+    }
+
     private fun login(email: String = "email", password: String = "password") {
         model.events.accept(Login.Event.LoginClicked(email, password))
     }
@@ -95,7 +107,7 @@ interface Login {
     data class State(val loader: Boolean, val emptyEmailError: Boolean, val emptyPasswordError: Boolean)
 
     interface Api {
-        fun call(email: String, password: String)
+        fun call(email: String, password: String): Completable
     }
 }
 
@@ -114,9 +126,12 @@ class LoginModel(private val api: Login.Api) : Model<Login.Event, Login.State>(L
                 .ofType(Login.Event.LoginClicked::class.java)
                 .filter { it.email.isNotEmpty() }
                 .filter { it.password.isNotEmpty() }
-                .map { api.call(it.email, it.password) }
-                .onLatestFrom(states) {
-                    copy(loader = true)
+                .switchMap {
+                    api.call(it.email, it.password)
+                            .onLatestFrom(states) {
+                                copy(loader = false)
+                            }
+                            .startWith(Observable.just(states.value.copy(loader = true)))
                 }
     }
 
@@ -139,3 +154,6 @@ class LoginModel(private val api: Login.Api) : Model<Login.Event, Login.State>(L
 
 private fun <T, State> Observable<T>.onLatestFrom(states: BehaviorRelay<State>, action: State.(T) -> State) =
         withLatestFrom(states, { item, state -> state.action(item) })
+
+private fun <State> Completable.onLatestFrom(states: BehaviorRelay<State>, action: State.() -> State) =
+        andThen(Observable.just(states.value.action()))
