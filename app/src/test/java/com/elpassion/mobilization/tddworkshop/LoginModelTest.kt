@@ -76,9 +76,10 @@ interface Login {
 
 class LoginModel(val api: Login.Api) : Model<Login.Event, Login.State>(Login.State(loader = false, emptyEmailError = false)) {
 
-    private val disposable =
-            Observable.merge(loginWithCredentials(),
-                    loginWithEmptyEmail()).subscribe(states)
+    init {
+        Observable.merge(loginWithCredentials(),
+                loginWithEmptyEmail()).subscribe(states)
+    }
 
     private fun loginWithCredentials(): Observable<Login.State> {
         return events
