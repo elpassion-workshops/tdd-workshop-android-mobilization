@@ -72,6 +72,12 @@ class LoginModelTest {
         assertLastState { !emptyEmailError }
     }
 
+    @Test
+    fun `Should show loader while calling api`() {
+        login()
+        assertLastState { loader }
+    }
+
     private fun login(email: String = "email", password: String = "password") {
         model.events.accept(Login.Event.LoginClicked(email, password))
     }
@@ -110,7 +116,7 @@ class LoginModel(private val api: Login.Api) : Model<Login.Event, Login.State>(L
                 .filter { it.password.isNotEmpty() }
                 .map { api.call(it.email, it.password) }
                 .onLatestFrom(states) {
-                    this
+                    copy(loader = true)
                 }
     }
 
