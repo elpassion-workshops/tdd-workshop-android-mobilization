@@ -97,6 +97,13 @@ class LoginModelTest {
         assertLastState { networkError }
     }
 
+    @Test
+    fun `Should hide loader after api call fails`() {
+        login()
+        apiSubject.onError(RuntimeException())
+        assertLastState { !loader }
+    }
+
     private fun login(email: String = "email", password: String = "password") {
         model.events.accept(Login.Event.LoginClicked(email, password))
     }
@@ -138,7 +145,7 @@ class LoginModel(private val api: Login.Api) : Model<Login.Event, Login.State>(L
                             .onLatestFrom(states) {
                                 copy(loader = false)
                             }
-                            .onErrorReturn { states.value.copy(networkError = true) }
+                            .onErrorReturn { states.value.copy(networkError = true, loader = false) }
                             .startWith(Observable.just(states.value.copy(loader = true)))
                 }
     }
