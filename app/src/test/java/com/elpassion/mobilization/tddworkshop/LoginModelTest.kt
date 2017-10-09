@@ -54,17 +54,21 @@ class LoginModelTest {
     @Test
     fun `Should show empty email error`() {
         login(email = "")
-        model.states.test().assertLastValueThat { emptyEmailError }
+        assertLastState { emptyEmailError }
     }
 
     @Test
     fun `Should show empty password error`() {
         login(password = "")
-        model.states.test().assertLastValueThat { emptyPasswordError }
+        assertLastState { emptyPasswordError }
     }
 
     private fun login(email: String = "email", password: String = "password") {
         model.events.accept(Login.Event.LoginClicked(email, password))
+    }
+
+    private fun assertLastState(predicate: Login.State.() -> Boolean) {
+        model.states.test().assertLastValueThat(predicate)
     }
 }
 
