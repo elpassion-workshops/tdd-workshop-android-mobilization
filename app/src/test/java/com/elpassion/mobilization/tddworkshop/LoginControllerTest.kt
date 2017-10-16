@@ -158,8 +158,8 @@ class LoginController(private val api: Login.Api,
 
     fun login(email: String, password: String) {
         if (email.isNotBlank() && password.isNotBlank()) {
-            view.showLoader()
             disposable = api.login(email, password)
+                    .doOnSubscribe { view.showLoader() }
                     .doAfterTerminate { view.hideLoader() }
                     .doOnDispose { view.hideLoader() }
                     .subscribe({
