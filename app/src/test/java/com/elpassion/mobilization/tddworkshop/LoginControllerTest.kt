@@ -6,7 +6,8 @@ import org.junit.Test
 class LoginControllerTest {
 
     private val api = mock<Login.Api>()
-    private val controller = LoginController(api)
+    private val view = mock<Login.View>()
+    private val controller = LoginController(api, view)
 
     @Test
     fun shouldCallApiOnLogin() {
@@ -40,6 +41,12 @@ class LoginControllerTest {
         verify(api, never()).login(any(), any())
     }
 
+    @Test
+    fun shouldShowEmptyEmailErrorWhenEmailIsEmpty() {
+        login(email = "")
+        verify(view).showEmptyEmailError()
+    }
+
     private fun login(email: String = "email", password: String = "password") {
         controller.login(email, password)
     }
@@ -49,12 +56,19 @@ interface Login {
     interface Api {
         fun login(email: String, password: String)
     }
+
+    interface View {
+        fun showEmptyEmailError()
+    }
 }
 
-class LoginController(private val api: Login.Api) {
+class LoginController(private val api: Login.Api,
+                      private val view: Login.View) {
     fun login(email: String, password: String) {
         if (email.isNotBlank() && password.isNotBlank()) {
             api.login(email, password)
+        }else if (email.isEmpty()) {
+            view.showEmptyEmailError()
         }
     }
 }
