@@ -171,6 +171,14 @@ class LoginControllerTest {
         verify(authRepository, never()).save(any())
     }
 
+    @Test
+    fun shouldOnlySaveToRepositoryTokenReturnedFromApi() {
+        login()
+        stubApiWithSuccess(token = "trueToken")
+        verify(authRepository).save("trueToken")
+        verifyNoMoreInteractions(authRepository)
+    }
+
     private fun stubApiToReturnError() {
         apiSubject.onError(RuntimeException())
         subscribeOnScheduler.triggerActions()
@@ -221,10 +229,7 @@ class LoginController(private val api: Login.Api,
                     .observeOn(observeOnScheduler)
                     .doOnSubscribe { view.showLoader() }
                     .doFinally { view.hideLoader() }
-                    .doOnSuccess {
-                        authRepository.save("token")
-                        authRepository.save("token2")
-                    }
+                    .doOnSuccess { authRepository.save(it) }
                     .subscribe({
                         view.showNextScreen()
                     }, {
