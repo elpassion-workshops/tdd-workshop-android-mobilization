@@ -3,7 +3,9 @@ package com.elpassion.mobilization.tddworkshop
 import com.nhaarman.mockito_kotlin.*
 import io.reactivex.Single
 import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.TestScheduler
 import io.reactivex.subjects.SingleSubject
+import org.junit.Assert
 import org.junit.Test
 
 class LoginControllerTest {
@@ -13,7 +15,8 @@ class LoginControllerTest {
         on { login(any(), any()) } doReturn apiSubject
     }
     private val view = mock<Login.View>()
-    private val controller = LoginController(api, view)
+    private val subscribeOnScheduler = TestScheduler()
+    private val controller = LoginController(api, view, subscribeOnScheduler)
 
     @Test
     fun shouldCallApiOnLogin() {
@@ -63,6 +66,7 @@ class LoginControllerTest {
     fun shouldOpenNextScreenOnLoginSucceed() {
         login()
         apiSubject.onSuccess(Unit)
+        subscribeOnScheduler.triggerActions()
         verify(view).showNextScreen()
     }
 
@@ -76,6 +80,7 @@ class LoginControllerTest {
     fun shouldShowErrorAfterApiReturnsError() {
         login()
         apiSubject.onError(RuntimeException())
+        subscribeOnScheduler.triggerActions()
         verify(view).showApiError()
     }
 
@@ -103,6 +108,7 @@ class LoginControllerTest {
     fun shouldHideLoaderWhenCallFinishes() {
         login()
         apiSubject.onSuccess(Unit)
+        subscribeOnScheduler.triggerActions()
         verify(view).hideLoader()
     }
 
@@ -116,6 +122,7 @@ class LoginControllerTest {
     fun shouldHideLoaderWhenCallEndsWithError() {
         login()
         apiSubject.onError(RuntimeException())
+        subscribeOnScheduler.triggerActions()
         verify(view).hideLoader()
     }
 
@@ -130,6 +137,12 @@ class LoginControllerTest {
     fun shouldNotHideLoaderOnDestroyWhenLoaderWasNotShown() {
         controller.onDestroy()
         verify(view, never()).hideLoader()
+    }
+
+    @Test
+    fun shouldNotSubscribeToApiUntilSchedulerAllows() {
+        login()
+        Assert.assertFalse(apiSubject.hasObservers())
     }
 
     private fun login(email: String = "email", password: String = "password") {
@@ -153,12 +166,14 @@ interface Login {
 }
 
 class LoginController(private val api: Login.Api,
-                      private val view: Login.View) {
+                      private val view: Login.View,
+                      private val subscribeOnScheduler: TestScheduler) {
     private var disposable: Disposable? = null
 
     fun login(email: String, password: String) {
         if (email.isNotBlank() && password.isNotBlank()) {
             disposable = api.login(email, password)
+                    .subscribeOn(subscribeOnScheduler)
                     .doOnSubscribe { view.showLoader() }
                     .doAfterTerminate { view.hideLoader() }
                     .doOnDispose { view.hideLoader() }
