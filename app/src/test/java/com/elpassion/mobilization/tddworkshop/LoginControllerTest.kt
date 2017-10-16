@@ -16,7 +16,8 @@ class LoginControllerTest {
     }
     private val view = mock<Login.View>()
     private val subscribeOnScheduler = TestScheduler()
-    private val controller = LoginController(api, view, subscribeOnScheduler)
+    private val observeOnScheduler = TestScheduler()
+    private val controller = LoginController(api, view, subscribeOnScheduler, observeOnScheduler)
 
     @Test
     fun shouldCallApiOnLogin() {
@@ -67,6 +68,7 @@ class LoginControllerTest {
         login()
         apiSubject.onSuccess(Unit)
         subscribeOnScheduler.triggerActions()
+        observeOnScheduler.triggerActions()
         verify(view).showNextScreen()
     }
 
@@ -81,6 +83,7 @@ class LoginControllerTest {
         login()
         apiSubject.onError(RuntimeException())
         subscribeOnScheduler.triggerActions()
+        observeOnScheduler.triggerActions()
         verify(view).showApiError()
     }
 
@@ -88,6 +91,8 @@ class LoginControllerTest {
     fun shouldNotShowErrorAfterApiReturnsSuccess() {
         login()
         apiSubject.onSuccess(Unit)
+        subscribeOnScheduler.triggerActions()
+        observeOnScheduler.triggerActions()
         verify(view, never()).showApiError()
     }
 
@@ -95,6 +100,8 @@ class LoginControllerTest {
     fun shouldNotOpenNextScreenAfterApiReturnsError() {
         login()
         apiSubject.onError(RuntimeException())
+        subscribeOnScheduler.triggerActions()
+        observeOnScheduler.triggerActions()
         verify(view, never()).showNextScreen()
     }
 
@@ -109,6 +116,7 @@ class LoginControllerTest {
         login()
         apiSubject.onSuccess(Unit)
         subscribeOnScheduler.triggerActions()
+        observeOnScheduler.triggerActions()
         verify(view).hideLoader()
     }
 
@@ -123,6 +131,7 @@ class LoginControllerTest {
         login()
         apiSubject.onError(RuntimeException())
         subscribeOnScheduler.triggerActions()
+        observeOnScheduler.triggerActions()
         verify(view).hideLoader()
     }
 
@@ -143,6 +152,14 @@ class LoginControllerTest {
     fun shouldNotSubscribeToApiUntilSchedulerAllows() {
         login()
         Assert.assertFalse(apiSubject.hasObservers())
+    }
+
+    @Test
+    fun shouldNotPropagateApiResponseToUiUntilSchedulerAllows() {
+        login()
+        apiSubject.onSuccess(Unit)
+        subscribeOnScheduler.triggerActions()
+        verify(view, never()).showNextScreen()
     }
 
     private fun login(email: String = "email", password: String = "password") {
@@ -167,13 +184,15 @@ interface Login {
 
 class LoginController(private val api: Login.Api,
                       private val view: Login.View,
-                      private val subscribeOnScheduler: TestScheduler) {
+                      private val subscribeOnScheduler: TestScheduler,
+                      private val observeOnScheduler: TestScheduler) {
     private var disposable: Disposable? = null
 
     fun login(email: String, password: String) {
         if (email.isNotBlank() && password.isNotBlank()) {
             disposable = api.login(email, password)
                     .subscribeOn(subscribeOnScheduler)
+                    .observeOn(observeOnScheduler)
                     .doOnSubscribe { view.showLoader() }
                     .doAfterTerminate { view.hideLoader() }
                     .doOnDispose { view.hideLoader() }
