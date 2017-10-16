@@ -194,8 +194,7 @@ class LoginController(private val api: Login.Api,
                     .subscribeOn(subscribeOnScheduler)
                     .observeOn(observeOnScheduler)
                     .doOnSubscribe { view.showLoader() }
-                    .doAfterTerminate { view.hideLoader() }
-                    .doOnDispose { view.hideLoader() }
+                    .doFinally { view.hideLoader() }
                     .subscribe({
                         view.showNextScreen()
                     }, {
