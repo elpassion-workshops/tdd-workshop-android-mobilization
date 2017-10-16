@@ -2,6 +2,7 @@ package com.elpassion.mobilization.tddworkshop
 
 import com.nhaarman.mockito_kotlin.*
 import io.reactivex.Single
+import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.SingleSubject
 import org.junit.Test
 
@@ -104,7 +105,7 @@ class LoginControllerTest {
         apiSubject.onSuccess(Unit)
         verify(view).hideLoader()
     }
-    
+
     @Test
     fun shouldNotHideLoaderBeforeCallEnds() {
         login()
@@ -123,6 +124,12 @@ class LoginControllerTest {
         login()
         controller.onDestroy()
         verify(view).hideLoader()
+    }
+
+    @Test
+    fun shouldNotHideLoaderOnDestroyWhenLoaderWasNotShown() {
+        controller.onDestroy()
+        verify(view, never()).hideLoader()
     }
 
     private fun login(email: String = "email", password: String = "password") {
@@ -147,11 +154,14 @@ interface Login {
 
 class LoginController(private val api: Login.Api,
                       private val view: Login.View) {
+    private var disposable: Disposable? = null
+
     fun login(email: String, password: String) {
         if (email.isNotBlank() && password.isNotBlank()) {
             view.showLoader()
-            api.login(email, password)
+            disposable = api.login(email, password)
                     .doAfterTerminate { view.hideLoader() }
+                    .doOnDispose { view.hideLoader() }
                     .subscribe({
                         view.showNextScreen()
                     }, {
@@ -165,6 +175,6 @@ class LoginController(private val api: Login.Api,
     }
 
     fun onDestroy() {
-        view.hideLoader()
+        disposable?.dispose()
     }
 }
