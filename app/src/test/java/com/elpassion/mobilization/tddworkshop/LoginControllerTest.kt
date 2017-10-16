@@ -61,6 +61,7 @@ class LoginControllerTest {
     @Test
     fun shouldOpenNextScreenOnLoginSucceed() {
         login()
+        apiSubject.onSuccess(Unit)
         verify(view).showNextScreen()
     }
 
@@ -82,6 +83,13 @@ class LoginControllerTest {
         login()
         apiSubject.onSuccess(Unit)
         verify(view, never()).showApiError()
+    }
+
+    @Test
+    fun shouldNotOpenNextScreenAfterApiReturnsError() {
+        login()
+        apiSubject.onError(RuntimeException())
+        verify(view, never()).showNextScreen()
     }
 
     private fun login(email: String = "email", password: String = "password") {
@@ -107,8 +115,11 @@ class LoginController(private val api: Login.Api,
     fun login(email: String, password: String) {
         if (email.isNotBlank() && password.isNotBlank()) {
             api.login(email, password)
-                    .subscribe({}, { view.showApiError() })
-            view.showNextScreen()
+                    .subscribe({
+                        view.showNextScreen()
+                    }, {
+                        view.showApiError()
+                    })
         } else if (email.isEmpty()) {
             view.showEmptyEmailError()
         } else if (password.isEmpty()) {
