@@ -165,6 +165,12 @@ class LoginControllerTest {
         verify(authRepository).save("token2")
     }
 
+    @Test
+    fun shouldNotSaveAuthTokenToRepositoryBeforeCallingApi() {
+        login()
+        verify(authRepository, never()).save(any())
+    }
+
     private fun stubApiToReturnError() {
         apiSubject.onError(RuntimeException())
         subscribeOnScheduler.triggerActions()
@@ -210,13 +216,15 @@ class LoginController(private val api: Login.Api,
 
     fun login(email: String, password: String) {
         if (email.isNotBlank() && password.isNotBlank()) {
-            authRepository.save("token")
-            authRepository.save("token2")
             disposable = api.login(email, password)
                     .subscribeOn(subscribeOnScheduler)
                     .observeOn(observeOnScheduler)
                     .doOnSubscribe { view.showLoader() }
                     .doFinally { view.hideLoader() }
+                    .doOnSuccess {
+                        authRepository.save("token")
+                        authRepository.save("token2")
+                    }
                     .subscribe({
                         view.showNextScreen()
                     }, {
