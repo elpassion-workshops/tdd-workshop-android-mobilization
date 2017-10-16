@@ -92,6 +92,12 @@ class LoginControllerTest {
         verify(view, never()).showNextScreen()
     }
 
+    @Test
+    fun shouldShowLoaderWhenCallingApi() {
+        login()
+        verify(view).showLoader()
+    }
+
     private fun login(email: String = "email", password: String = "password") {
         controller.login(email, password)
     }
@@ -107,6 +113,7 @@ interface Login {
         fun showEmptyPasswordError()
         fun showNextScreen()
         fun showApiError()
+        fun showLoader()
     }
 }
 
@@ -114,6 +121,7 @@ class LoginController(private val api: Login.Api,
                       private val view: Login.View) {
     fun login(email: String, password: String) {
         if (email.isNotBlank() && password.isNotBlank()) {
+            view.showLoader()
             api.login(email, password)
                     .subscribe({
                         view.showNextScreen()
