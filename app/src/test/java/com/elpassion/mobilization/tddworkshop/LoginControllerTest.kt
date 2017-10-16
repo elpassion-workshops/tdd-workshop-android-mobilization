@@ -10,14 +10,15 @@ import org.junit.Test
 
 class LoginControllerTest {
 
-    private val apiSubject = SingleSubject.create<Unit>()
+    private val apiSubject = SingleSubject.create<String>()
     private val api = mock<Login.Api> {
         on { login(any(), any()) } doReturn apiSubject
     }
     private val view = mock<Login.View>()
     private val subscribeOnScheduler = TestScheduler()
     private val observeOnScheduler = TestScheduler()
-    private val controller = LoginController(api, view, subscribeOnScheduler, observeOnScheduler)
+    private val authRepository = mock<Login.AuthTokenRepository>()
+    private val controller = LoginController(api, view, subscribeOnScheduler, observeOnScheduler, authRepository)
 
     @Test
     fun shouldCallApiOnLogin() {
@@ -145,9 +146,16 @@ class LoginControllerTest {
     @Test
     fun shouldNotPropagateApiResponseToUiUntilSchedulerAllows() {
         login()
-        apiSubject.onSuccess(Unit)
+        apiSubject.onSuccess("token")
         subscribeOnScheduler.triggerActions()
         verify(view, never()).showNextScreen()
+    }
+
+    @Test
+    fun shouldSaveAuthTokenToRepositoryAfterCallSucceed() {
+        login()
+        stubApiWithSuccess()
+        verify(authRepository).save("token")
     }
 
     private fun stubApiToReturnError() {
@@ -157,7 +165,7 @@ class LoginControllerTest {
     }
 
     private fun stubApiWithSuccess() {
-        apiSubject.onSuccess(Unit)
+        apiSubject.onSuccess("token")
         subscribeOnScheduler.triggerActions()
         observeOnScheduler.triggerActions()
     }
@@ -169,7 +177,7 @@ class LoginControllerTest {
 
 interface Login {
     interface Api {
-        fun login(email: String, password: String): Single<Unit>
+        fun login(email: String, password: String): Single<String>
     }
 
     interface View {
@@ -180,16 +188,22 @@ interface Login {
         fun showLoader()
         fun hideLoader()
     }
+
+    interface AuthTokenRepository {
+        fun save(token: String)
+    }
 }
 
 class LoginController(private val api: Login.Api,
                       private val view: Login.View,
                       private val subscribeOnScheduler: TestScheduler,
-                      private val observeOnScheduler: TestScheduler) {
+                      private val observeOnScheduler: TestScheduler,
+                      private val authRepository: Login.AuthTokenRepository) {
     private var disposable: Disposable? = null
 
     fun login(email: String, password: String) {
         if (email.isNotBlank() && password.isNotBlank()) {
+            authRepository.save("token")
             disposable = api.login(email, password)
                     .subscribeOn(subscribeOnScheduler)
                     .observeOn(observeOnScheduler)
