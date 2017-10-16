@@ -144,11 +144,10 @@ class LoginController(private val api: Login.Api,
         if (email.isNotBlank() && password.isNotBlank()) {
             view.showLoader()
             api.login(email, password)
+                    .doAfterTerminate { view.hideLoader() }
                     .subscribe({
                         view.showNextScreen()
-                        view.hideLoader()
                     }, {
-                        view.hideLoader()
                         view.showApiError()
                     })
         } else if (email.isEmpty()) {
