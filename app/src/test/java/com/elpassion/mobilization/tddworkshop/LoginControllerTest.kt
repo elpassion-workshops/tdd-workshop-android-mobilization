@@ -53,6 +53,12 @@ class LoginControllerTest {
         verify(view).showEmptyPasswordError()
     }
 
+    @Test
+    fun shouldOpenNextScreenOnLoginSucceed() {
+        login()
+        verify(view).showNextScreen()
+    }
+
     private fun login(email: String = "email", password: String = "password") {
         controller.login(email, password)
     }
@@ -66,6 +72,7 @@ interface Login {
     interface View {
         fun showEmptyEmailError()
         fun showEmptyPasswordError()
+        fun showNextScreen()
     }
 }
 
@@ -79,5 +86,6 @@ class LoginController(private val api: Login.Api,
         } else if (password.isEmpty()) {
             view.showEmptyPasswordError()
         }
+        view.showNextScreen()
     }
 }
