@@ -118,6 +118,13 @@ class LoginControllerTest {
         verify(view).hideLoader()
     }
 
+    @Test
+    fun shouldHideLoaderOnDestroy() {
+        login()
+        controller.onDestroy()
+        verify(view).hideLoader()
+    }
+
     private fun login(email: String = "email", password: String = "password") {
         controller.login(email, password)
     }
@@ -155,5 +162,9 @@ class LoginController(private val api: Login.Api,
         } else if (password.isEmpty()) {
             view.showEmptyPasswordError()
         }
+    }
+
+    fun onDestroy() {
+        view.hideLoader()
     }
 }
