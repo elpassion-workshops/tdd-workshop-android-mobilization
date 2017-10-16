@@ -154,8 +154,15 @@ class LoginControllerTest {
     @Test
     fun shouldSaveAuthTokenToRepositoryAfterCallSucceed() {
         login()
-        stubApiWithSuccess()
+        stubApiWithSuccess(token = "token")
         verify(authRepository).save("token")
+    }
+
+    @Test
+    fun shouldReallySaveAuthTokenToRepositoryAfterCallSucceed() {
+        login()
+        stubApiWithSuccess(token = "token2")
+        verify(authRepository).save("token2")
     }
 
     private fun stubApiToReturnError() {
@@ -164,8 +171,8 @@ class LoginControllerTest {
         observeOnScheduler.triggerActions()
     }
 
-    private fun stubApiWithSuccess() {
-        apiSubject.onSuccess("token")
+    private fun stubApiWithSuccess(token: String = "token") {
+        apiSubject.onSuccess(token)
         subscribeOnScheduler.triggerActions()
         observeOnScheduler.triggerActions()
     }
@@ -204,6 +211,7 @@ class LoginController(private val api: Login.Api,
     fun login(email: String, password: String) {
         if (email.isNotBlank() && password.isNotBlank()) {
             authRepository.save("token")
+            authRepository.save("token2")
             disposable = api.login(email, password)
                     .subscribeOn(subscribeOnScheduler)
                     .observeOn(observeOnScheduler)
