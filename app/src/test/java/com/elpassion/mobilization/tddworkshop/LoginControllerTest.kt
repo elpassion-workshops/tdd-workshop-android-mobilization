@@ -1,11 +1,16 @@
 package com.elpassion.mobilization.tddworkshop
 
 import com.nhaarman.mockito_kotlin.*
+import io.reactivex.Single
+import io.reactivex.subjects.SingleSubject
 import org.junit.Test
 
 class LoginControllerTest {
 
-    private val api = mock<Login.Api>()
+    private val apiSubject = SingleSubject.create<Unit>()
+    private val api = mock<Login.Api> {
+        on { login(any(), any()) } doReturn apiSubject
+    }
     private val view = mock<Login.View>()
     private val controller = LoginController(api, view)
 
@@ -68,7 +73,15 @@ class LoginControllerTest {
     @Test
     fun shouldShowErrorAfterApiReturnsError() {
         login()
+        apiSubject.onError(RuntimeException())
         verify(view).showApiError()
+    }
+
+    @Test
+    fun shouldNotShowErrorAfterApiReturnsSuccess() {
+        login()
+        apiSubject.onSuccess(Unit)
+        verify(view, never()).showApiError()
     }
 
     private fun login(email: String = "email", password: String = "password") {
@@ -78,7 +91,7 @@ class LoginControllerTest {
 
 interface Login {
     interface Api {
-        fun login(email: String, password: String)
+        fun login(email: String, password: String): Single<Unit>
     }
 
     interface View {
@@ -94,8 +107,8 @@ class LoginController(private val api: Login.Api,
     fun login(email: String, password: String) {
         if (email.isNotBlank() && password.isNotBlank()) {
             api.login(email, password)
+                    .subscribe({}, { view.showApiError() })
             view.showNextScreen()
-            view.showApiError()
         } else if (email.isEmpty()) {
             view.showEmptyEmailError()
         } else if (password.isEmpty()) {
