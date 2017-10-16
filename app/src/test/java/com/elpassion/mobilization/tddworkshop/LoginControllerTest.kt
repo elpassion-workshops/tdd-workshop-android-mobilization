@@ -66,9 +66,7 @@ class LoginControllerTest {
     @Test
     fun shouldOpenNextScreenOnLoginSucceed() {
         login()
-        apiSubject.onSuccess(Unit)
-        subscribeOnScheduler.triggerActions()
-        observeOnScheduler.triggerActions()
+        stubApiWithSuccess()
         verify(view).showNextScreen()
     }
 
@@ -88,9 +86,7 @@ class LoginControllerTest {
     @Test
     fun shouldNotShowErrorAfterApiReturnsSuccess() {
         login()
-        apiSubject.onSuccess(Unit)
-        subscribeOnScheduler.triggerActions()
-        observeOnScheduler.triggerActions()
+        stubApiWithSuccess()
         verify(view, never()).showApiError()
     }
 
@@ -110,9 +106,7 @@ class LoginControllerTest {
     @Test
     fun shouldHideLoaderWhenCallFinishes() {
         login()
-        apiSubject.onSuccess(Unit)
-        subscribeOnScheduler.triggerActions()
-        observeOnScheduler.triggerActions()
+        stubApiWithSuccess()
         verify(view).hideLoader()
     }
 
@@ -158,6 +152,12 @@ class LoginControllerTest {
 
     private fun stubApiToReturnError() {
         apiSubject.onError(RuntimeException())
+        subscribeOnScheduler.triggerActions()
+        observeOnScheduler.triggerActions()
+    }
+
+    private fun stubApiWithSuccess() {
+        apiSubject.onSuccess(Unit)
         subscribeOnScheduler.triggerActions()
         observeOnScheduler.triggerActions()
     }
