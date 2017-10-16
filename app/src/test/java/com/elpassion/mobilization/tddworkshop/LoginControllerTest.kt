@@ -59,6 +59,12 @@ class LoginControllerTest {
         verify(view).showNextScreen()
     }
 
+    @Test
+    fun shouldNotOpenNextScreenWhenCredentialsAreInvalid() {
+        login(email = "")
+        verify(view, never()).showNextScreen()
+    }
+
     private fun login(email: String = "email", password: String = "password") {
         controller.login(email, password)
     }
@@ -81,11 +87,11 @@ class LoginController(private val api: Login.Api,
     fun login(email: String, password: String) {
         if (email.isNotBlank() && password.isNotBlank()) {
             api.login(email, password)
+            view.showNextScreen()
         } else if (email.isEmpty()) {
             view.showEmptyEmailError()
         } else if (password.isEmpty()) {
             view.showEmptyPasswordError()
         }
-        view.showNextScreen()
     }
 }
