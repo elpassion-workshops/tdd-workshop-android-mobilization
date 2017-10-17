@@ -60,4 +60,12 @@ class LoginActivityTest {
         onId(R.id.loginButton).click()
         verify(api).login("email@email.pl", "password")
     }
+
+    @Test
+    fun Show_loader_on_login() {
+        onId(R.id.emailInput).replaceText("email@email.pl")
+        onId(R.id.passwordInput).replaceText("password")
+        onId(R.id.loginButton).click()
+        onId(R.id.loader).isDisplayed()
+    }
 }
