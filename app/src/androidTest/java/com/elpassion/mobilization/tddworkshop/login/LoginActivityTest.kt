@@ -23,5 +23,10 @@ class LoginActivityTest {
                 .replaceText("email@wp.pl")
                 .hasText("email@wp.pl")
     }
+
+    @Test
+    fun Display_password_header() {
+        onText(R.string.password_header).isDisplayed()
+    }
 }
 
