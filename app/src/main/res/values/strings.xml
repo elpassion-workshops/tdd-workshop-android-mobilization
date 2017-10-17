@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Mobilization TDD Workshop</string>
+    <string name="email_header">Email</string>
 </resources>
