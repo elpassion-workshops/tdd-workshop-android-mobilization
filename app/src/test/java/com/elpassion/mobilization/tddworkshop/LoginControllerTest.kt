@@ -71,6 +71,12 @@ class LoginControllerTest {
         verify(view).showLoginCallError()
     }
 
+    @Test
+    fun `Show empty email error`() {
+        login(email = "")
+        verify(view).showEmptyEmailError()
+    }
+
     private fun login(email: String = "email@wp.pl", password: String = "password") {
         LoginController(api, view).onLogin(email, password)
     }
@@ -85,12 +91,16 @@ interface Login {
         fun showLoader()
         fun openNextScreen()
         fun showLoginCallError()
+        fun showEmptyEmailError()
     }
 }
 
 class LoginController(private val api: Login.Api, private val view: Login.View) {
 
     fun onLogin(email: String, password: String) {
+        if (email.isEmpty()) {
+            view.showEmptyEmailError()
+        }
         if (email.isNotEmpty() && password.isNotEmpty()) {
             view.showLoader()
             api.login(email, password)
