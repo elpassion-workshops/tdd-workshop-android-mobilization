@@ -42,4 +42,9 @@ class LoginActivityTest {
     fun shouldShowPasswordInput() {
         onId(R.id.passwordInput).isDisplayed()
     }
+
+    @Test
+    fun shouldPasswordInputBeWritable() {
+        onId(R.id.passwordInput).typeText("secret").hasText("secret")
+    }
 }
