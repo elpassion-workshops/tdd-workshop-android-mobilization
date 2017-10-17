@@ -1,9 +1,11 @@
 package com.elpassion.mobilization.tddworkshop.login
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.elpassion.android.view.hide
 import com.elpassion.android.view.show
+import com.elpassion.mobilization.tddworkshop.MainActivity
 import com.elpassion.mobilization.tddworkshop.R
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -34,7 +36,7 @@ class LoginActivity : AppCompatActivity(), Login.View {
     }
 
     override fun openNextScreen() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        startActivity(Intent(this, MainActivity::class.java))
     }
 
     override fun showLoginCallError() {

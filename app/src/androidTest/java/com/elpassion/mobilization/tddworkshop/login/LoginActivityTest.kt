@@ -2,6 +2,7 @@ package com.elpassion.mobilization.tddworkshop.login
 
 import android.support.test.rule.ActivityTestRule
 import com.elpassion.android.commons.espresso.*
+import com.elpassion.mobilization.tddworkshop.MainActivity
 import com.elpassion.mobilization.tddworkshop.R
 import com.elpassion.mobilization.tddworkshop.util.hasHiddenInput
 import com.nhaarman.mockito_kotlin.any
@@ -25,6 +26,9 @@ class LoginActivityTest {
             LoginActivity.api = api
         }
     }
+
+    @Rule @JvmField
+    val intentRule = InitIntentsRule()
 
     @Test
     fun Display_email_header() {
@@ -109,6 +113,13 @@ class LoginActivityTest {
     @Test
     fun Not_show_empty_password_error_on_start() {
         onText(R.string.empty_password_error).isNotDisplayed()
+    }
+
+    @Test
+    fun Open_next_screen_on_login_success() {
+        login()
+        loginSubject.onSuccess(Login.User(1))
+        checkIntent(MainActivity::class.java)
     }
 
     private fun login(email: String = "email@email.pl", password: String = "password") {
