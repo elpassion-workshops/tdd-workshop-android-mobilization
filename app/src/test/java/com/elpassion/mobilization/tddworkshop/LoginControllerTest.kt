@@ -83,6 +83,13 @@ class LoginControllerTest {
         verify(view).showEmptyPasswordError()
     }
 
+    @Test
+    fun `Hide loader when api call finished with error`() {
+        login()
+        loginSubject.onError(RuntimeException())
+        verify(view).hideLoader()
+    }
+
     private fun login(email: String = "email@wp.pl", password: String = "password") {
         LoginController(api, view).onLogin(email, password)
     }
@@ -99,6 +106,7 @@ interface Login {
         fun showLoginCallError()
         fun showEmptyEmailError()
         fun showEmptyPasswordError()
+        fun hideLoader()
     }
 }
 
@@ -114,6 +122,7 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
         if (email.isNotEmpty() && password.isNotEmpty()) {
             view.showLoader()
             api.login(email, password)
+                    .doOnTerminate { view.hideLoader() }
                     .subscribe(
                             { view.openNextScreen() },
                             { view.showLoginCallError() })
