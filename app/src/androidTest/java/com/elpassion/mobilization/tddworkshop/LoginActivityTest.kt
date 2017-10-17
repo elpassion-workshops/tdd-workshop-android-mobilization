@@ -19,4 +19,9 @@ class LoginActivityTest {
     fun shouldShowLoginInput() {
         onId(R.id.loginInput).isDisplayed()
     }
+
+    @Test
+    fun shouldLoginInputBeWritable() {
+        onId(R.id.loginInput).typeText("my email").hasText("my email")
+    }
 }
