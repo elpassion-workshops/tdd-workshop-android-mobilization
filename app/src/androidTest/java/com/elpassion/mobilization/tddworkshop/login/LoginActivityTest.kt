@@ -75,6 +75,13 @@ class LoginActivityTest {
         onId(R.id.loader).isNotDisplayed()
     }
 
+    @Test
+    fun Hide_loader_on_error_from_api() {
+        login()
+        loginSubject.onError(RuntimeException())
+        onId(R.id.loader).isNotDisplayed()
+    }
+
     private fun login() {
         onId(R.id.emailInput).replaceText("email@email.pl")
         onId(R.id.passwordInput).replaceText("password")
