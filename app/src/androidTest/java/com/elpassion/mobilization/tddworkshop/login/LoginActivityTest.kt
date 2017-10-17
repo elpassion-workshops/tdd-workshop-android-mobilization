@@ -89,8 +89,14 @@ class LoginActivityTest {
         onText(R.string.login_call_error).isDisplayed()
     }
 
-    private fun login() {
-        onId(R.id.emailInput).replaceText("email@email.pl")
+    @Test
+    fun Show_empty_email_error() {
+        login(email = "")
+        onText(R.string.empty_email_error).isDisplayed()
+    }
+
+    private fun login(email: String = "email@email.pl") {
+        onId(R.id.emailInput).replaceText(email)
         onId(R.id.passwordInput).replaceText("password")
         onId(R.id.loginButton).click()
     }

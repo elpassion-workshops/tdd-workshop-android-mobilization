@@ -8,6 +8,12 @@
         android:layout_height="wrap_content"
         android:text="@string/email_header" />
 
+    <TextView
+        android:id="@+id/emptyEmailError"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/empty_email_error" />
+
     <EditText
         android:id="@+id/emailInput"
         android:layout_width="wrap_content"

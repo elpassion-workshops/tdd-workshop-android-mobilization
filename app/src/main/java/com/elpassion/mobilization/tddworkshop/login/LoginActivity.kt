@@ -42,7 +42,7 @@ class LoginActivity : AppCompatActivity(), Login.View {
     }
 
     override fun showEmptyEmailError() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        emptyEmailError.show()
     }
 
     override fun showEmptyPasswordError() {
