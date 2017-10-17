@@ -26,14 +26,15 @@
 
     <Button
         android:id="@+id/loginButton"
-        android:text="@string/login_button"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="@string/login_button" />
 
     <TextView
-        android:text="loader"
         android:id="@+id/loader"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="loader"
+        android:visibility="gone" />
 
 </android.support.constraint.ConstraintLayout>

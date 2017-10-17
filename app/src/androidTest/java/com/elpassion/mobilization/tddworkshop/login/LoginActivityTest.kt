@@ -70,6 +70,11 @@ class LoginActivityTest {
         onId(R.id.loginButton).hasText("Login")
     }
 
+    @Test
+    fun Not_show_loader_before_login() {
+        onId(R.id.loader).isNotDisplayed()
+    }
+
     private fun login() {
         onId(R.id.emailInput).replaceText("email@email.pl")
         onId(R.id.passwordInput).replaceText("password")
