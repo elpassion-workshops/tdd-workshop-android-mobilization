@@ -4,17 +4,11 @@ package com.elpassion.mobilization.tddworkshop
 
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.verify
-import org.junit.Assert
 import org.junit.Test
 
 class LoginControllerTest {
 
     private val api = mock<Login.Api>()
-
-    @Test
-    fun `Should init login controller`() {
-        Assert.assertNotNull(LoginController(api))
-    }
 
     @Test
     fun `Call api on login`() {
