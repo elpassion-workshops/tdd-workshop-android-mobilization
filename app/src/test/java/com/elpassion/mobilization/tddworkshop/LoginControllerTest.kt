@@ -18,7 +18,7 @@ class LoginControllerTest {
         whenever(login(any(), any())).thenReturn(loginSubject)
     }
     private val view = mock<Login.View>()
-    private val loginController = LoginController(api, view, Schedulers.trampoline())
+    private val loginController = LoginController(api, view, Schedulers.trampoline(), Schedulers.trampoline())
 
     @Test
     fun `Call api on login`() {
@@ -111,10 +111,20 @@ class LoginControllerTest {
     @Test
     fun `Call api on on given scheduler`() {
         val ioScheduler = TestScheduler()
-        LoginController(api, view, ioScheduler).onLogin("email@wp.pl", "password")
+        LoginController(api, view, ioScheduler, Schedulers.trampoline()).onLogin("email@wp.pl", "password")
         verify(view, never()).showLoader()
         ioScheduler.triggerActions()
         verify(view).showLoader()
+    }
+
+    @Test
+    fun `Observe api result on main scheduler`() {
+        val uiScheduler = TestScheduler()
+        LoginController(api, view, Schedulers.trampoline(), uiScheduler).onLogin("email@wp.pl", "password")
+        loginSubject.onComplete()
+        verify(view, never()).hideLoader()
+        uiScheduler.triggerActions()
+        verify(view).hideLoader()
     }
 
     private fun login(email: String = "email@wp.pl", password: String = "password") {
@@ -137,7 +147,7 @@ interface Login {
     }
 }
 
-class LoginController(private val api: Login.Api, private val view: Login.View, private val ioScheduler: Scheduler) {
+class LoginController(private val api: Login.Api, private val view: Login.View, private val ioScheduler: Scheduler, private val uiScheduler: Scheduler) {
 
     private var disposable: Disposable? = null
 
@@ -151,8 +161,9 @@ class LoginController(private val api: Login.Api, private val view: Login.View, 
         if (email.isNotEmpty() && password.isNotEmpty()) {
             disposable = api.login(email, password)
                     .doOnSubscribe { view.showLoader() }
-                    .doFinally { view.hideLoader() }
                     .subscribeOn(ioScheduler)
+                    .observeOn(uiScheduler)
+                    .doFinally { view.hideLoader() }
                     .subscribe(
                             { view.openNextScreen() },
                             { view.showLoginCallError() })
