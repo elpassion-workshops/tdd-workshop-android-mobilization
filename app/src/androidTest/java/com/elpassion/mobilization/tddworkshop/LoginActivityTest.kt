@@ -32,4 +32,9 @@ class LoginActivityTest {
     fun shouldLoginInputHasImeTypeEmail() {
         onId(R.id.loginInput).check(matches(withInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS or InputType.TYPE_CLASS_TEXT)))
     }
+
+    @Test
+    fun shouldShowPasswordHeader() {
+        onText("password").isDisplayed()
+    }
 }
