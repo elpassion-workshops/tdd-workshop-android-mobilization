@@ -1,9 +1,11 @@
 package com.elpassion.mobilization.tddworkshop
 
 import android.support.test.espresso.assertion.ViewAssertions.matches
+import android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom
 import android.support.test.espresso.matcher.ViewMatchers.withInputType
 import android.support.test.rule.ActivityTestRule
 import android.text.InputType
+import android.widget.Button
 import com.elpassion.android.commons.espresso.*
 import org.junit.Rule
 import org.junit.Test
@@ -61,5 +63,10 @@ class LoginActivityTest {
     @Test
     fun shouldLoginButtonHaveTextLogin() {
         onId(R.id.loginButton).hasText("Login")
+    }
+
+    @Test
+    fun shouldLoginButtonBeActuallyAButton() {
+        onId(R.id.loginButton).check(matches(isAssignableFrom(Button::class.java)))
     }
 }
