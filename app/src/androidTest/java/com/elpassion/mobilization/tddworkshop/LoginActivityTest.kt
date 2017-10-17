@@ -1,8 +1,7 @@
 package com.elpassion.mobilization.tddworkshop
 
 import android.support.test.rule.ActivityTestRule
-import com.elpassion.android.commons.espresso.isDisplayed
-import com.elpassion.android.commons.espresso.onText
+import com.elpassion.android.commons.espresso.*
 import org.junit.Rule
 import org.junit.Test
 
@@ -14,5 +13,10 @@ class LoginActivityTest {
     @Test
     fun shouldShowLoginHeader() {
         onText("login").isDisplayed()
+    }
+
+    @Test
+    fun shouldShowLoginInput() {
+        onId(R.id.loginInput).isDisplayed()
     }
 }
