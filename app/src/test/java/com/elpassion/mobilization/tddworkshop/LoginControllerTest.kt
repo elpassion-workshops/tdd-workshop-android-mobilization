@@ -3,22 +3,23 @@
 package com.elpassion.mobilization.tddworkshop
 
 import com.nhaarman.mockito_kotlin.*
-import io.reactivex.Completable
 import io.reactivex.Scheduler
+import io.reactivex.Single
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.schedulers.TestScheduler
-import io.reactivex.subjects.CompletableSubject
+import io.reactivex.subjects.SingleSubject
 import org.junit.Test
 
 class LoginControllerTest {
 
-    private val loginSubject = CompletableSubject.create()
+    private val loginSubject = SingleSubject.create<Login.User>()
     private val api = mock<Login.Api>().apply {
         whenever(login(any(), any())).thenReturn(loginSubject)
     }
     private val view = mock<Login.View>()
-    private val loginController = LoginController(api, view, Schedulers.trampoline(), Schedulers.trampoline())
+    private val repository = mock<Login.Repository>()
+    private val loginController = LoginController(api, view, repository, Schedulers.trampoline(), Schedulers.trampoline())
 
     @Test
     fun `Call api on login`() {
@@ -59,7 +60,7 @@ class LoginControllerTest {
     @Test
     fun `Open next screen on successful api call`() {
         login()
-        loginSubject.onComplete()
+        completeApiCall()
         verify(view).openNextScreen()
     }
 
@@ -111,7 +112,7 @@ class LoginControllerTest {
     @Test
     fun `Call api on on given scheduler`() {
         val ioScheduler = TestScheduler()
-        LoginController(api, view, ioScheduler, Schedulers.trampoline()).onLogin("email@wp.pl", "password")
+        LoginController(api, view, repository, ioScheduler, Schedulers.trampoline()).onLogin("email@wp.pl", "password")
         verify(view, never()).showLoader()
         ioScheduler.triggerActions()
         verify(view).showLoader()
@@ -120,11 +121,23 @@ class LoginControllerTest {
     @Test
     fun `Observe api result on main scheduler`() {
         val uiScheduler = TestScheduler()
-        LoginController(api, view, Schedulers.trampoline(), uiScheduler).onLogin("email@wp.pl", "password")
-        loginSubject.onComplete()
+        LoginController(api, view, repository, Schedulers.trampoline(), uiScheduler).onLogin("email@wp.pl", "password")
+        completeApiCall()
         verify(view, never()).hideLoader()
         uiScheduler.triggerActions()
         verify(view).hideLoader()
+    }
+
+    @Test
+    fun `Save returned user to repository`() {
+        login()
+        val user = Login.User(id = 1)
+        completeApiCall(user)
+        verify(repository).save(user)
+    }
+
+    private fun completeApiCall(user: Login.User = Login.User(id = 1)) {
+        loginSubject.onSuccess(user)
     }
 
     private fun login(email: String = "email@wp.pl", password: String = "password") {
@@ -134,7 +147,7 @@ class LoginControllerTest {
 
 interface Login {
     interface Api {
-        fun login(email: String, password: String): Completable
+        fun login(email: String, password: String): Single<User>
     }
 
     interface View {
@@ -145,9 +158,15 @@ interface Login {
         fun showEmptyPasswordError()
         fun hideLoader()
     }
+
+    interface Repository {
+        fun save(user: User)
+    }
+
+    data class User(val id: Int)
 }
 
-class LoginController(private val api: Login.Api, private val view: Login.View, private val ioScheduler: Scheduler, private val uiScheduler: Scheduler) {
+class LoginController(private val api: Login.Api, private val view: Login.View, private val repository: Login.Repository, private val ioScheduler: Scheduler, private val uiScheduler: Scheduler) {
 
     private var disposable: Disposable? = null
 
@@ -164,6 +183,7 @@ class LoginController(private val api: Login.Api, private val view: Login.View, 
                     .subscribeOn(ioScheduler)
                     .observeOn(uiScheduler)
                     .doFinally { view.hideLoader() }
+                    .doOnSuccess { repository.save(it) }
                     .subscribe(
                             { view.openNextScreen() },
                             { view.showLoginCallError() })
