@@ -4,7 +4,10 @@ package com.elpassion.mobilization.tddworkshop
 
 import com.nhaarman.mockito_kotlin.*
 import io.reactivex.Completable
+import io.reactivex.Scheduler
 import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
+import io.reactivex.schedulers.TestScheduler
 import io.reactivex.subjects.CompletableSubject
 import org.junit.Test
 
@@ -15,7 +18,7 @@ class LoginControllerTest {
         whenever(login(any(), any())).thenReturn(loginSubject)
     }
     private val view = mock<Login.View>()
-    private val loginController = LoginController(api, view)
+    private val loginController = LoginController(api, view, Schedulers.trampoline())
 
     @Test
     fun `Call api on login`() {
@@ -105,6 +108,15 @@ class LoginControllerTest {
         verify(view, never()).hideLoader()
     }
 
+    @Test
+    fun `Call api on on given scheduler`() {
+        val ioScheduler = TestScheduler()
+        LoginController(api, view, ioScheduler).onLogin("email@wp.pl", "password")
+        verify(view, never()).showLoader()
+        ioScheduler.triggerActions()
+        verify(view).showLoader()
+    }
+
     private fun login(email: String = "email@wp.pl", password: String = "password") {
         loginController.onLogin(email, password)
     }
@@ -125,7 +137,7 @@ interface Login {
     }
 }
 
-class LoginController(private val api: Login.Api, private val view: Login.View) {
+class LoginController(private val api: Login.Api, private val view: Login.View, private val ioScheduler: Scheduler) {
 
     private var disposable: Disposable? = null
 
@@ -140,6 +152,7 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
             disposable = api.login(email, password)
                     .doOnSubscribe { view.showLoader() }
                     .doFinally { view.hideLoader() }
+                    .subscribeOn(ioScheduler)
                     .subscribe(
                             { view.openNextScreen() },
                             { view.showLoginCallError() })
