@@ -12,7 +12,8 @@
         android:id="@+id/emptyEmailError"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/empty_email_error" />
+        android:text="@string/empty_email_error"
+        android:visibility="gone" />
 
     <EditText
         android:id="@+id/emailInput"
