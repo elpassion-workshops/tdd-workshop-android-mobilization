@@ -1,11 +1,9 @@
 package com.elpassion.mobilization.tddworkshop.login
 
-import android.support.test.espresso.assertion.ViewAssertions
-import android.support.test.espresso.matcher.ViewMatchers
 import android.support.test.rule.ActivityTestRule
-import android.text.InputType
 import com.elpassion.android.commons.espresso.*
 import com.elpassion.mobilization.tddworkshop.R
+import com.elpassion.mobilization.tddworkshop.util.hasHiddenInput
 import org.junit.Rule
 import org.junit.Test
 
@@ -35,12 +33,9 @@ class LoginActivityTest {
     @Test
     fun Display_password_input() {
         onId(R.id.passwordInput)
-                .check(ViewAssertions.matches(
-                        ViewMatchers.withInputType(
-                                InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD)))
+                .hasHiddenInput()
                 .isDisplayed()
                 .replaceText("password")
                 .hasText("password")
     }
 }
-
