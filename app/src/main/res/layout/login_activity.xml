@@ -9,7 +9,7 @@
         android:text="@string/email_header" />
 
     <EditText
-        android:id="@+id/email_input"
+        android:id="@+id/emailInput"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
@@ -17,5 +17,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/password_header" />
+
+    <EditText
+        android:id="@+id/passwordInput"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textPassword" />
 
 </android.support.constraint.ConstraintLayout>
