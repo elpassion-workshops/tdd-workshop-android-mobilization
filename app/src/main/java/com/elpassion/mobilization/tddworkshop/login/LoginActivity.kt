@@ -46,7 +46,7 @@ class LoginActivity : AppCompatActivity(), Login.View {
     }
 
     override fun showEmptyPasswordError() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        emptyPasswordError.show()
     }
 
     companion object {
