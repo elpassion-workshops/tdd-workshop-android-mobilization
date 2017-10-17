@@ -37,7 +37,9 @@ class LoginActivity : AppCompatActivity(), Login.View {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun showLoginCallError() = Unit
+    override fun showLoginCallError() {
+        errorMessage.setText(R.string.login_call_error)
+    }
 
     override fun showEmptyEmailError() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.

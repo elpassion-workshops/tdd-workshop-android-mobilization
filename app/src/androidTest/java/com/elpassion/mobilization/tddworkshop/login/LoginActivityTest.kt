@@ -82,6 +82,13 @@ class LoginActivityTest {
         onId(R.id.loader).isNotDisplayed()
     }
 
+    @Test
+    fun Show_login_call_error() {
+        login()
+        loginSubject.onError(RuntimeException())
+        onText(R.string.login_call_error).isDisplayed()
+    }
+
     private fun login() {
         onId(R.id.emailInput).replaceText("email@email.pl")
         onId(R.id.passwordInput).replaceText("password")

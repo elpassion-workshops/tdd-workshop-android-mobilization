@@ -3,4 +3,5 @@
     <string name="email_header">Email</string>
     <string name="password_header">password</string>
     <string name="login_button">Login</string>
+    <string name="login_call_error">api call error</string>
 </resources>
