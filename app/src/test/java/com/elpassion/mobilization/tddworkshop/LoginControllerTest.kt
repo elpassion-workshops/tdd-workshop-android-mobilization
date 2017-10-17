@@ -127,7 +127,7 @@ interface Login {
 
 class LoginController(private val api: Login.Api, private val view: Login.View) {
 
-    private var disposable : Disposable? = null
+    private var disposable: Disposable? = null
 
     fun onLogin(email: String, password: String) {
         if (email.isEmpty()) {
@@ -137,8 +137,8 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
             view.showEmptyPasswordError()
         }
         if (email.isNotEmpty() && password.isNotEmpty()) {
-            view.showLoader()
             disposable = api.login(email, password)
+                    .doOnSubscribe { view.showLoader() }
                     .doFinally { view.hideLoader() }
                     .subscribe(
                             { view.openNextScreen() },
