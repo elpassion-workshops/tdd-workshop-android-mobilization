@@ -1,8 +1,6 @@
 package com.elpassion.mobilization.tddworkshop
 
 import com.nhaarman.mockito_kotlin.*
-import io.reactivex.Single
-import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.TestScheduler
 import io.reactivex.subjects.SingleSubject
 import org.junit.Assert
@@ -193,56 +191,5 @@ class LoginControllerTest {
 
     private fun login(email: String = "email", password: String = "password") {
         controller.login(email, password)
-    }
-}
-
-interface Login {
-    interface Api {
-        fun login(email: String, password: String): Single<String>
-    }
-
-    interface View {
-        fun showEmptyEmailError()
-        fun showEmptyPasswordError()
-        fun showNextScreen()
-        fun showApiError()
-        fun showLoader()
-        fun hideLoader()
-    }
-
-    interface AuthTokenRepository {
-        fun save(token: String)
-    }
-}
-
-class LoginController(private val api: Login.Api,
-                      private val view: Login.View,
-                      private val subscribeOnScheduler: TestScheduler,
-                      private val observeOnScheduler: TestScheduler,
-                      private val authRepository: Login.AuthTokenRepository) {
-    private var disposable: Disposable? = null
-
-    fun login(email: String, password: String) {
-        if (email.isNotBlank() && password.isNotBlank()) {
-            disposable = api.login(email, password)
-                    .subscribeOn(subscribeOnScheduler)
-                    .observeOn(observeOnScheduler)
-                    .doOnSubscribe { view.showLoader() }
-                    .doFinally { view.hideLoader() }
-                    .doOnSuccess { authRepository.save(it) }
-                    .subscribe({
-                        view.showNextScreen()
-                    }, {
-                        view.showApiError()
-                    })
-        } else if (email.isEmpty()) {
-            view.showEmptyEmailError()
-        } else if (password.isEmpty()) {
-            view.showEmptyPasswordError()
-        }
-    }
-
-    fun onDestroy() {
-        disposable?.dispose()
     }
 }
