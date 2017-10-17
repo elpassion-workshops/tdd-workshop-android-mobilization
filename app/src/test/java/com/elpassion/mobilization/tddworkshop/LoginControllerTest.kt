@@ -14,6 +14,7 @@ class LoginControllerTest {
         whenever(login(any(), any())).thenReturn(loginSubject)
     }
     private val view = mock<Login.View>()
+    private val loginController = LoginController(api, view)
 
     @Test
     fun `Call api on login`() {
@@ -90,8 +91,15 @@ class LoginControllerTest {
         verify(view).hideLoader()
     }
 
+    @Test
+    fun `Hide loader on destroy if call is still in progress`() {
+        login()
+        loginController.onDestroy()
+        verify(view).hideLoader()
+    }
+
     private fun login(email: String = "email@wp.pl", password: String = "password") {
-        LoginController(api, view).onLogin(email, password)
+        loginController.onLogin(email, password)
     }
 }
 
@@ -127,5 +135,9 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
                             { view.openNextScreen() },
                             { view.showLoginCallError() })
         }
+    }
+
+    fun onDestroy() {
+        view.hideLoader()
     }
 }
