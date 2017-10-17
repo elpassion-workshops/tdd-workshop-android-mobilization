@@ -55,22 +55,24 @@ class LoginActivityTest {
 
     @Test
     fun Call_api_with_provided_email_and_password_on_login_click() {
-        onId(R.id.emailInput).replaceText("email@email.pl")
-        onId(R.id.passwordInput).replaceText("password")
-        onId(R.id.loginButton).click()
+        login()
         verify(api).login("email@email.pl", "password")
     }
 
     @Test
     fun Show_loader_on_login() {
-        onId(R.id.emailInput).replaceText("email@email.pl")
-        onId(R.id.passwordInput).replaceText("password")
-        onId(R.id.loginButton).click()
+        login()
         onId(R.id.loader).isDisplayed()
     }
 
     @Test
     fun Login_button_should_have_text() {
         onId(R.id.loginButton).hasText("Login")
+    }
+
+    private fun login() {
+        onId(R.id.emailInput).replaceText("email@email.pl")
+        onId(R.id.passwordInput).replaceText("password")
+        onId(R.id.loginButton).click()
     }
 }
