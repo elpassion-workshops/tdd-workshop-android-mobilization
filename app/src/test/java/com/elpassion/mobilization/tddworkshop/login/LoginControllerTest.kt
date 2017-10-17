@@ -1,9 +1,7 @@
 @file:Suppress("IllegalIdentifier")
 
-package com.elpassion.mobilization.tddworkshop
+package com.elpassion.mobilization.tddworkshop.login
 
-import com.elpassion.mobilization.tddworkshop.login.Login
-import com.elpassion.mobilization.tddworkshop.login.LoginController
 import com.nhaarman.mockito_kotlin.*
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.schedulers.TestScheduler
