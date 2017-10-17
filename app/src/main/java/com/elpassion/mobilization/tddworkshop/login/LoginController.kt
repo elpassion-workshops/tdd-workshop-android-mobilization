@@ -16,11 +16,11 @@ class LoginController(private val api: Login.Api, private val view: Login.View, 
         }
         if (email.isNotEmpty() && password.isNotEmpty()) {
             disposable = api.login(email, password)
-                    .doOnSubscribe { view.showLoader() }
                     .subscribeOn(ioScheduler)
-                    .observeOn(uiScheduler)
-                    .doFinally { view.hideLoader() }
                     .doOnSuccess { repository.save(it) }
+                    .observeOn(uiScheduler)
+                    .doOnSubscribe { view.showLoader() }
+                    .doFinally { view.hideLoader() }
                     .subscribe(
                             { view.openNextScreen() },
                             { view.showLoginCallError() })

@@ -110,9 +110,10 @@ class LoginControllerTest {
     fun `Call api on on given scheduler`() {
         val ioScheduler = TestScheduler()
         LoginController(api, view, repository, ioScheduler, Schedulers.trampoline()).onLogin("email@wp.pl", "password")
-        verify(view, never()).showLoader()
+        completeApiCall()
+        verify(view, never()).openNextScreen()
         ioScheduler.triggerActions()
-        verify(view).showLoader()
+        verify(view).openNextScreen()
     }
 
     @Test
@@ -120,9 +121,9 @@ class LoginControllerTest {
         val uiScheduler = TestScheduler()
         LoginController(api, view, repository, Schedulers.trampoline(), uiScheduler).onLogin("email@wp.pl", "password")
         completeApiCall()
-        verify(view, never()).hideLoader()
+        verify(view, never()).openNextScreen()
         uiScheduler.triggerActions()
-        verify(view).hideLoader()
+        verify(view).openNextScreen()
     }
 
     @Test
