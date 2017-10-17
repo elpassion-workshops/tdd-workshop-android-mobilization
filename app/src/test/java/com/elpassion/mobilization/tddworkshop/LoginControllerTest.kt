@@ -4,6 +4,7 @@ package com.elpassion.mobilization.tddworkshop
 
 import com.nhaarman.mockito_kotlin.*
 import io.reactivex.Completable
+import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.CompletableSubject
 import org.junit.Test
 
@@ -98,6 +99,12 @@ class LoginControllerTest {
         verify(view).hideLoader()
     }
 
+    @Test
+    fun `Not hide loader on destroy if call is not in progress`() {
+        loginController.onDestroy()
+        verify(view, never()).hideLoader()
+    }
+
     private fun login(email: String = "email@wp.pl", password: String = "password") {
         loginController.onLogin(email, password)
     }
@@ -120,6 +127,8 @@ interface Login {
 
 class LoginController(private val api: Login.Api, private val view: Login.View) {
 
+    private var disposable : Disposable? = null
+
     fun onLogin(email: String, password: String) {
         if (email.isEmpty()) {
             view.showEmptyEmailError()
@@ -129,8 +138,8 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
         }
         if (email.isNotEmpty() && password.isNotEmpty()) {
             view.showLoader()
-            api.login(email, password)
-                    .doOnTerminate { view.hideLoader() }
+            disposable = api.login(email, password)
+                    .doFinally { view.hideLoader() }
                     .subscribe(
                             { view.openNextScreen() },
                             { view.showLoginCallError() })
@@ -138,6 +147,6 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
     }
 
     fun onDestroy() {
-        view.hideLoader()
+        disposable?.dispose()
     }
 }
