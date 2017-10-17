@@ -38,5 +38,6 @@ dependencies {
     androidTestImplementation('com.android.support.test.espresso:espresso-core:3.0.1', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    androidTestImplementation "com.elpassion.android.commons:espresso:0.0.21"
     androidTestImplementation group: 'com.nhaarman', name: 'mockito-kotlin-kt1.1', version: mockito_kotlin_version
 }
