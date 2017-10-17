@@ -57,4 +57,9 @@ class LoginActivityTest {
     fun shouldShowLoginButton() {
         onId(R.id.loginButton).isDisplayed()
     }
+
+    @Test
+    fun shouldLoginButtonHaveTextLogin() {
+        onId(R.id.loginButton).hasText("Login")
+    }
 }
