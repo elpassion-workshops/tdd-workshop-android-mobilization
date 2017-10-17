@@ -10,12 +10,18 @@
         android:text="login" />
 
     <EditText
-        android:inputType="textEmailAddress"
         android:id="@+id/loginInput"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:inputType="textEmailAddress" />
+
     <TextView
-        android:text="password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="password" />
+
+    <TextView
+        android:id="@+id/passwordInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 </LinearLayout>
