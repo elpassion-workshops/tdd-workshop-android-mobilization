@@ -47,4 +47,9 @@ class LoginActivityTest {
     fun shouldPasswordInputBeWritable() {
         onId(R.id.passwordInput).typeText("secret").hasText("secret")
     }
+
+    @Test
+    fun shouldPasswordInputHasInputTypePassword() {
+        onId(R.id.passwordInput).check(matches(withInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD or InputType.TYPE_CLASS_TEXT)))
+    }
 }
