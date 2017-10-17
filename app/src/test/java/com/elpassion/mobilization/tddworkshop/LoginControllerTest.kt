@@ -2,15 +2,17 @@
 
 package com.elpassion.mobilization.tddworkshop
 
-import com.nhaarman.mockito_kotlin.any
-import com.nhaarman.mockito_kotlin.mock
-import com.nhaarman.mockito_kotlin.never
-import com.nhaarman.mockito_kotlin.verify
+import com.nhaarman.mockito_kotlin.*
+import io.reactivex.Completable
+import io.reactivex.subjects.CompletableSubject
 import org.junit.Test
 
 class LoginControllerTest {
 
-    private val api = mock<Login.Api>()
+    private val loginSubject = CompletableSubject.create()
+    private val api = mock<Login.Api>().apply {
+        whenever(login(any(), any())).thenReturn(loginSubject)
+    }
     private val view = mock<Login.View>()
 
     @Test
@@ -52,7 +54,14 @@ class LoginControllerTest {
     @Test
     fun `Open next screen on successful api call`() {
         login()
+        loginSubject.onComplete()
         verify(view).openNextScreen()
+    }
+
+    @Test
+    fun `Not open next screen before api call finished`() {
+        login()
+        verify(view, never()).openNextScreen()
     }
 
     private fun login(email: String = "email@wp.pl", password: String = "password") {
@@ -62,7 +71,7 @@ class LoginControllerTest {
 
 interface Login {
     interface Api {
-        fun login(email: String, password: String)
+        fun login(email: String, password: String): Completable
     }
 
     interface View {
@@ -76,8 +85,8 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
     fun onLogin(email: String, password: String) {
         if (email.isNotEmpty() && password.isNotEmpty()) {
             view.showLoader()
-            view.openNextScreen()
             api.login(email, password)
+                    .subscribe { view.openNextScreen() }
         }
     }
 }
