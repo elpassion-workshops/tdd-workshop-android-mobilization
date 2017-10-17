@@ -101,6 +101,11 @@ class LoginActivityTest {
         onText(R.string.empty_password_error).isDisplayed()
     }
 
+    @Test
+    fun Not_show_empty_password_error_on_start() {
+        onText(R.string.empty_password_error).isNotDisplayed()
+    }
+
     private fun login(email: String = "email@email.pl", password: String = "password") {
         onId(R.id.emailInput).replaceText(email)
         onId(R.id.passwordInput).replaceText(password)
