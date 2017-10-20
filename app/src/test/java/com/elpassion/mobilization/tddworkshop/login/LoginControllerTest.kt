@@ -82,16 +82,13 @@ interface Login {
 
 class LoginController(private val api: Login.Api, private val view: Login.View) {
     fun login(email: String, password: String) {
-        if (email.isEmpty()){
-            view.setEmailErrorMessage()
-            return
-        }
-
-        if (password.isNotEmpty()) {
-            view.showProgressView()
-            api.login("email@wp.pl", "password")
-        } else {
-            view.setPasswordErrorMessage()
+        when {
+            email.isEmpty() -> view.setEmailErrorMessage()
+            password.isEmpty() -> view.setPasswordErrorMessage()
+            else -> {
+                view.showProgressView()
+                api.login("email@wp.pl", "password")
+            }
         }
     }
 }
