@@ -51,5 +51,10 @@ class LoginActivityTest {
         onId(R.id.passwordInput)
                 .check(matches(withInputType(TYPE_CLASS_TEXT or TYPE_TEXT_VARIATION_PASSWORD)))
     }
+
+    @Test
+    fun should_hide_loader_on_start() {
+        onId(R.id.loader).isNotDisplayed()
+    }
 }
 
