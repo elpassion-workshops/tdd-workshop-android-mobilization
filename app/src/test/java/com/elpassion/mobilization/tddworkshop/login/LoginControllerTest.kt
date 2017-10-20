@@ -14,14 +14,18 @@ class LoginControllerTest {
 
     @Test
     fun `Call api on login`() {
-        LoginController(api).login("emial@wp.pl")
+        login()
         verify(api, times(1)).login()
     }
 
     @Test
     fun `Not call api if email is empty`() {
-        LoginController(api).login(email = "")
+        login(email = "")
         verify(api, never()).login()
+    }
+
+    private fun login(email: String = "email@wp.pl") {
+        LoginController(api).login(email)
     }
 }
 
