@@ -31,7 +31,8 @@ dependencies {
     implementation group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: kotlin_version
     implementation 'io.reactivex.rxjava2:rxjava:2.1.1'
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
-    implementation "com.elpassion.android.commons:view:0.0.21"
+    implementation 'com.elpassion.android.commons:view:0.0.21'
+    implementation 'com.android.support:design:26.1.0'
 }
 
 dependencies {

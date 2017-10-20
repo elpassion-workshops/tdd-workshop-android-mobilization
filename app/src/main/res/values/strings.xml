@@ -3,4 +3,5 @@
     <string name="email_header">Email:</string>
     <string name="password_header">password</string>
     <string name="login">Login</string>
+    <string name="empty_email_message">Empty email</string>
 </resources>

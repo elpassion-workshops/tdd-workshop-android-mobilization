@@ -7,19 +7,25 @@ import android.text.InputType.TYPE_CLASS_TEXT
 import android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
 import com.elpassion.android.commons.espresso.*
 import com.elpassion.mobilization.tddworkshop.R
+import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockito_kotlin.never
 import com.nhaarman.mockito_kotlin.verify
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import org.junit.Rule
 import org.junit.Test
 
 class LoginActivityTest {
 
     val api = mock<Login.Api>()
+    val repository = mock<Login.Repository>()
 
     @Rule @JvmField
     val rule = object : ActivityTestRule<LoginActivity>(LoginActivity::class.java) {
         override fun beforeActivityLaunched() {
             LoginActivity.api = api
+            LoginActivity.repository = repository
         }
     }
 
@@ -59,6 +65,14 @@ class LoginActivityTest {
         onId(R.id.passwordInput).replaceText("test@test.com")
         onId(R.id.loginButton).click()
         verify(api).login("test@test.com", "test@test.com")
+    }
+
+    @Test
+    fun should_show_error_if_email_is_empty() {
+        onId(R.id.emailInput).replaceText("")
+        onId(R.id.loginButton).click()
+        verify(api, never()).login(any(), any())
+        onText(R.string.empty_email_message).isDisplayed()
     }
 }
 
