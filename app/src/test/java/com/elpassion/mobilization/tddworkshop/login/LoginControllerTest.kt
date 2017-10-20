@@ -29,7 +29,7 @@ class LoginControllerTest {
     }
 
     @Test
-    fun `Not call api if password is empty`(){
+    fun `Not call api if password is empty`() {
         login(password = "")
         verify(api, never()).login(any(), eq(""))
     }
@@ -51,7 +51,7 @@ class LoginControllerTest {
     }
 
     @Test
-    fun `Hide loader after calling login`(){
+    fun `Hide loader after calling login`() {
         login()
         subject.onComplete()
         verify(view).hideLoader()
@@ -85,7 +85,7 @@ class LoginControllerTest {
 
     }
 
-    private fun login(email: String = "email", password: String="password") {
+    private fun login(email: String = "email", password: String = "password") {
         LoginController(api, view, navigator).login(email, password)
     }
 }
@@ -106,17 +106,19 @@ interface Navigator {
     fun openHome()
 }
 
-class LoginController(private val api: Login.Api, private val view : Login.View, private val nav: Navigator) {
+class LoginController(private val api: Login.Api, private val view: Login.View, private val nav: Navigator) {
     fun login(email: String, password: String) {
         if (email.isNotEmpty() && password.isNotEmpty()) {
             view.showLoader()
-            api.login(email, password).subscribe ({
-                view.hideLoader()
-                nav.openHome()
-            },{
-                throwable ->  view.showError()
-                view.hideLoader()
-            })
+            api.login(email, password)
+                    .doAfterTerminate {
+                        view.hideLoader()
+                    }
+                    .subscribe({
+                        nav.openHome()
+                    }, { throwable ->
+                        view.showError()
+                    })
         }
     }
 }
