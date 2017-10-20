@@ -5,6 +5,7 @@ package com.elpassion.mobilization.tddworkshop.login
 import com.nhaarman.mockito_kotlin.*
 import io.reactivex.Scheduler
 import io.reactivex.Single
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.schedulers.TestScheduler
 import io.reactivex.subjects.SingleSubject
@@ -122,9 +123,23 @@ class LoginControllerTest {
         verify(view).showDashboardView()
     }
 
+    @Test
+    fun `Check if login break on view exit`() {
+        val loginController = login()
+
+        verify(view).showProgressView()
+        verify(view, never()).hideProgressView()
+        loginController.onDestroy()
+        verify(view).hideProgressView()
+        verify(view, never()).showDashboardView()
+
+    }
+
     private fun login(email: String = "email@wp.pl", password: String = "password",
-                      uiScheduler: Scheduler = Schedulers.trampoline(), ioScheduler: Scheduler = Schedulers.trampoline()) {
-        LoginController(api, view, repo, uiScheduler, ioScheduler).login(email, password)
+                      uiScheduler: Scheduler = Schedulers.trampoline(), ioScheduler: Scheduler = Schedulers.trampoline()): LoginController {
+        val loginController = LoginController(api, view, repo, uiScheduler, ioScheduler)
+        loginController.login(email, password)
+        return loginController
 
     }
 
@@ -141,6 +156,7 @@ interface Login {
         fun setPasswordErrorMessage()
         fun showDashboardView()
         fun showLoginFailedMessage()
+        fun hideProgressView()
     }
 
     interface Repo {
@@ -151,23 +167,31 @@ interface Login {
 
 class LoginController(private val api: Login.Api, private val view: Login.View, private val repo: Login.Repo,
                       private val uiScheduler: Scheduler, private val ioScheduler: Scheduler) {
+
+    private val compositeDisposable by lazy { CompositeDisposable() }
+
     fun login(email: String, password: String) {
         when {
             email.isEmpty() -> view.setEmailErrorMessage()
             password.isEmpty() -> view.setPasswordErrorMessage()
             else -> {
-                api.login(email, password).
+                compositeDisposable.add(api.login(email, password).
                         subscribeOn(ioScheduler).
                         doOnSubscribe { view.showProgressView() }.
                         doOnSuccess { repo.persistUserData(email, it) }.
+                        doFinally { view.hideProgressView() }.
                         observeOn(uiScheduler).
                         subscribe({
                             view.showDashboardView()
                         }, {
                             view.showLoginFailedMessage()
-                        })
+                        }))
             }
         }
+    }
+
+    fun onDestroy() {
+        compositeDisposable.clear()
     }
 }
 
