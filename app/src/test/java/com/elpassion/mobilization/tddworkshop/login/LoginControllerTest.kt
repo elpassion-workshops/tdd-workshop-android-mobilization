@@ -54,7 +54,7 @@ class LoginControllerTest {
     }
 
     @Test
-    fun `Not show Home screem if call in progress`() {
+    fun `Not show Home screen if call in progress`() {
         login()
         verify(view, never()).openHomeScreen()
     }
