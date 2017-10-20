@@ -21,7 +21,6 @@ interface Login {
     interface Api {
         fun login()
     }
-
 }
 
 class LoginController(private val api: Login.Api) {
