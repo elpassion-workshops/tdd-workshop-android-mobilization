@@ -13,23 +13,23 @@ class LoginControllerTest {
 
     @Test
     fun `Call api on login`() {
-        login(password = "testPass")
+        login()
         verify(api).login()
     }
 
     @Test
     fun `Not call api if email is empty`() {
-        login(email = "", password = "")
+        login(email = "")
         verify(api, never()).login()
     }
 
     @Test
-    fun `Not call api if pass is empty`() {
+    fun `Not call api if password is empty`() {
         login(password = "")
         verify(api, never()).login()
     }
 
-    private fun login(email: String = "email@wp.pl", password: String) {
+    private fun login(email: String = "email@wp.pl", password: String = "testPassword") {
         LoginController(api).login(email, password)
     }
 }
