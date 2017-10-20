@@ -100,6 +100,13 @@ class LoginControllerTest {
         verify(view).hideLoader()
     }
 
+    @Test
+    fun `Hide loader after login fails`() {
+        login()
+        loginCallSubject.onError(RuntimeException())
+        verify(view).hideLoader()
+    }
+
     private fun login(email: String = USER_EMAIL, password: String = USER_PASSWORD) {
         LoginController(api, view, repository).login(email, password)
     }
@@ -137,6 +144,7 @@ class LoginController(private val api: Login.Api, private val view: Login.View, 
     }
 
     private fun handleError(t: Throwable) {
+        view.hideLoader()
         view.showLoginError()
     }
 
