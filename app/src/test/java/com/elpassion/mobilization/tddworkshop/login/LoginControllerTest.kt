@@ -12,7 +12,7 @@ class LoginControllerTest {
     private val completableSubject = SingleSubject.create<String>()
     private val api = mock<Login.Api>().apply { whenever(login(any(), any())).thenReturn(completableSubject) }
     private val view = mock<Login.View>()
-    private val repo = mock<Repo>()
+    private val repo = mock<Login.Repo>()
 
     @Test
     fun `Call api on login`() {
@@ -114,14 +114,16 @@ interface Login {
         fun showDashboardView()
         fun showLoginFailedMessage()
     }
+
+    interface Repo {
+        fun persistUserData(email: String, token: String)
+    }
 }
 
-interface Repo {
-    fun persistUserData(email: String, token: String)
-}
 
 
-class LoginController(private val api: Login.Api, private val view: Login.View, private val repo: Repo) {
+
+class LoginController(private val api: Login.Api, private val view: Login.View, private val repo: Login.Repo) {
     fun login(email: String, password: String) {
         when {
             email.isEmpty() -> view.setEmailErrorMessage()
