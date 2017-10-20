@@ -10,6 +10,7 @@ import org.junit.Test
 class LoginControllerTest {
 
     private val api = mock<Login.Api>()
+    private val view = mock<Login.View>()
 
     @Test
     fun `Call api on login`() {
@@ -35,9 +36,16 @@ class LoginControllerTest {
         verify(api, never()).login()
     }
 
-    private fun login(email: String = "email@wp.pl", password: String = "password") {
-        LoginController(api).login(email, password)
+    @Test
+    fun `Show progress view on login action`() {
+        login()
+        verify(view).showProgressView()
     }
+
+    private fun login(email: String = "email@wp.pl", password: String = "password") {
+        LoginController(api, view).login(email, password)
+    }
+
 
 }
 
@@ -45,11 +53,17 @@ interface Login {
     interface Api {
         fun login()
     }
+
+    interface View {
+        fun showProgressView()
+    }
 }
 
-class LoginController(private val api: Login.Api) {
+
+class LoginController(private val api: Login.Api, private val view: Login.View) {
     fun login(email: String, password: String) {
         if (email.isNotEmpty() && password.isNotEmpty()) {
+            view.showProgressView()
             api.login()
         }
     }
