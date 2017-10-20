@@ -5,9 +5,6 @@ package com.elpassion.mobilization.tddworkshop.login
 import com.nhaarman.mockito_kotlin.*
 import io.reactivex.Completable
 import io.reactivex.Scheduler
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.internal.schedulers.IoScheduler
-import io.reactivex.schedulers.Schedulers
 import io.reactivex.schedulers.Schedulers.trampoline
 import io.reactivex.schedulers.TestScheduler
 import io.reactivex.subjects.CompletableSubject
