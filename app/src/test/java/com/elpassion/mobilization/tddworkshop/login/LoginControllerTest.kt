@@ -77,21 +77,20 @@ class LoginControllerTest {
     @Test
     fun `Not show dashboard when login in failed`() {
         login()
-        completableSubject.onError(RuntimeException())
+        completableSubject.mockError()
         verify(view, never()).showDashboardView()
     }
 
     @Test
     fun `Show error when login in failed`() {
         login()
-        completableSubject.onError(RuntimeException())
+        completableSubject.mockError()
         verify(view).showLoginFailedMessage()
     }
 
     private fun login(email: String = "email@wp.pl", password: String = "password") {
         LoginController(api, view).login(email, password)
     }
-
 
 }
 
@@ -124,4 +123,8 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
             }
         }
     }
+}
+
+private fun CompletableSubject.mockError() {
+    this.onError(RuntimeException())
 }
