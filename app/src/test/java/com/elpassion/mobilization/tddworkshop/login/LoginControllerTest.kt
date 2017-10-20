@@ -4,6 +4,7 @@ package com.elpassion.mobilization.tddworkshop.login
 
 import com.nhaarman.mockito_kotlin.*
 import io.reactivex.Single
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.subjects.SingleSubject
 import org.junit.Test
 
@@ -20,6 +21,8 @@ class LoginControllerTest {
         whenever(this.login(any(), any())).thenReturn(loginCallSubject)
     }
     private val view = mock<Login.View>()
+
+    private val controller = LoginController(api, view, repository)
 
     @Test
     fun `Not call api if email is empty`() {
@@ -107,8 +110,20 @@ class LoginControllerTest {
         verify(view).hideLoader()
     }
 
+    @Test
+    fun `Hide loader doesn't called after login interruption`() {
+        login()
+        interrupt()
+        loginCallSubject.onError(RuntimeException())
+        verify(view, never()).hideLoader()
+    }
+
     private fun login(email: String = USER_EMAIL, password: String = USER_PASSWORD) {
-        LoginController(api, view, repository).login(email, password)
+        controller.login(email, password)
+    }
+
+    private fun interrupt() {
+        controller.interrupt()
     }
 }
 
@@ -131,11 +146,14 @@ interface Login {
 }
 
 class LoginController(private val api: Login.Api, private val view: Login.View, private val repository: Login.Repository) {
+    private val disposable = CompositeDisposable()
+
     fun login(email: String, password: String) {
         if (email.isNotEmpty() && password.isNotEmpty()) {
-            api.login(email, password)
-                    .doAfterTerminate(view::hideLoader)
-                    .subscribe(this::handleSuccess, this::handleError)
+            disposable.add(
+                api.login(email, password)
+                        .doAfterTerminate(view::hideLoader)
+                        .subscribe(this::handleSuccess, this::handleError))
             view.showLoader()
         }
 
@@ -151,6 +169,10 @@ class LoginController(private val api: Login.Api, private val view: Login.View, 
     private fun handleSuccess(user: User) {
         repository.saveUserToken(user)
         view.openHomeScreen()
+    }
+
+    fun interrupt() {
+        disposable.clear()
     }
 }
 
