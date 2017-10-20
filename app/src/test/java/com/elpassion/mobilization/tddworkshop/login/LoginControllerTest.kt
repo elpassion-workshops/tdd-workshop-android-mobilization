@@ -45,6 +45,12 @@ class LoginControllerTest {
         verify(view).showLoader()
     }
 
+    @Test
+    fun `Show Home screen after login success`() {
+        login()
+        verify(view).openHomeScreen()
+    }
+
     private fun login(email: String = "email@wp.pl", password: String = "password") {
         LoginController(api,view).login(email, password)
     }
@@ -58,6 +64,7 @@ interface Login {
     interface View {
         fun showEmptyEmailError()
         fun showLoader()
+        fun openHomeScreen()
     }
 }
 
@@ -71,5 +78,6 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
         if (email.isEmpty()) {
             view.showEmptyEmailError()
         }
+        view.openHomeScreen()
     }
 }
