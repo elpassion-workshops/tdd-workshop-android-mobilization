@@ -15,7 +15,7 @@ class LoginControllerTest {
     @Test
     fun `Call api on login`() {
         login()
-        verify(api, times(1)).login()
+        verify(api).login()
     }
 
     @Test
