@@ -158,7 +158,7 @@ class LoginController(private val api: Login.Api,
                     .subscribeOn(ioScheduler)
                     .observeOn(uiScheduler)
                     .doOnSubscribe { view.showLoader() }
-                    .doFinally { view.hideLoader() }
+                    .doAfterTerminate { view.hideLoader() }
                     .doOnSuccess { repository.saveToken(it) }
                     .subscribe(this::onSuccess, this::onError)
         }
