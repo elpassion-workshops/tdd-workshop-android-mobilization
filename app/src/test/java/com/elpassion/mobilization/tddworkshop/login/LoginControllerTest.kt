@@ -54,6 +54,12 @@ class LoginControllerTest {
         verify(view).setEmailErrorMessage()
     }
 
+    @Test
+    fun `Show error when password is incorrect`() {
+        login(password = "")
+        verify(view).setPasswordErrorMessage()
+    }
+
     private fun login(email: String = "email@wp.pl", password: String = "password") {
         LoginController(api, view).login(email, password)
     }
@@ -69,6 +75,7 @@ interface Login {
     interface View {
         fun showProgressView()
         fun setEmailErrorMessage()
+        fun setPasswordErrorMessage()
     }
 }
 
@@ -83,6 +90,8 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
         if (password.isNotEmpty()) {
             view.showProgressView()
             api.login("email@wp.pl", "password")
+        } else {
+            view.setPasswordErrorMessage()
         }
     }
 }
