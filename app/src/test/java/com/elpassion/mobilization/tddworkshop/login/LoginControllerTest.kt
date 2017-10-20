@@ -74,6 +74,20 @@ class LoginControllerTest {
         verify(view, never()).showDashboardView()
     }
 
+    @Test
+    fun `Not show dashboard when login in failed`() {
+        login()
+        completableSubject.onError(RuntimeException())
+        verify(view, never()).showDashboardView()
+    }
+
+    @Test
+    fun `Show error when login in failed`() {
+        login()
+        completableSubject.onError(RuntimeException())
+        verify(view).showLoginFailedMessage()
+    }
+
     private fun login(email: String = "email@wp.pl", password: String = "password") {
         LoginController(api, view).login(email, password)
     }
@@ -91,6 +105,7 @@ interface Login {
         fun setEmailErrorMessage()
         fun setPasswordErrorMessage()
         fun showDashboardView()
+        fun showLoginFailedMessage()
     }
 }
 
@@ -102,7 +117,9 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
             password.isEmpty() -> view.setPasswordErrorMessage()
             else -> {
                 view.showProgressView()
-                api.login("email@wp.pl", "password").subscribe{ view.showDashboardView() }
+                api.login("email@wp.pl", "password").subscribe(
+                        { view.showDashboardView() },
+                        { _ -> view.showLoginFailedMessage() })
 
             }
         }
