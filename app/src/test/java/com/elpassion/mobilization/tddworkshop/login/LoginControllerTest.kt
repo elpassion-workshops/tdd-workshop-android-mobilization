@@ -4,8 +4,6 @@ package com.elpassion.mobilization.tddworkshop.login
 
 import com.nhaarman.mockito_kotlin.*
 import io.reactivex.Scheduler
-import io.reactivex.Single
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.schedulers.TestScheduler
 import io.reactivex.subjects.SingleSubject
@@ -143,56 +141,6 @@ class LoginControllerTest {
 
     }
 
-}
-
-interface Login {
-    interface Api {
-        fun login(email: String, password: String): Single<String>
-    }
-
-    interface View {
-        fun showProgressView()
-        fun setEmailErrorMessage()
-        fun setPasswordErrorMessage()
-        fun showDashboardView()
-        fun showLoginFailedMessage()
-        fun hideProgressView()
-    }
-
-    interface Repo {
-        fun persistUserData(email: String, token: String)
-    }
-}
-
-
-class LoginController(private val api: Login.Api, private val view: Login.View, private val repo: Login.Repo,
-                      private val uiScheduler: Scheduler, private val ioScheduler: Scheduler) {
-
-    private val compositeDisposable by lazy { CompositeDisposable() }
-
-    fun login(email: String, password: String) {
-        when {
-            email.isEmpty() -> view.setEmailErrorMessage()
-            password.isEmpty() -> view.setPasswordErrorMessage()
-            else -> {
-                compositeDisposable.add(api.login(email, password).
-                        subscribeOn(ioScheduler).
-                        doOnSubscribe { view.showProgressView() }.
-                        doOnSuccess { repo.persistUserData(email, it) }.
-                        doFinally { view.hideProgressView() }.
-                        observeOn(uiScheduler).
-                        subscribe({
-                            view.showDashboardView()
-                        }, {
-                            view.showLoginFailedMessage()
-                        }))
-            }
-        }
-    }
-
-    fun onDestroy() {
-        compositeDisposable.clear()
-    }
 }
 
 private fun <T> SingleSubject<T>.mockError() {
