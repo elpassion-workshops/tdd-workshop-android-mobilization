@@ -31,7 +31,7 @@ class LoginControllerTest {
     fun `Call api on login with user data`() {
         val email = "email@o.pl"
         val password = "pass"
-        login(email, password )
+        login(email, password)
         verify(api).login(email = email, password = password)
     }
 
@@ -66,34 +66,49 @@ class LoginControllerTest {
         verify(view, never()).openHomeScreen()
     }
 
+    @Test
+    fun `Show error when login fails`() {
+        login()
+        loginCallSubject.onError(RuntimeException())
+        verify(view).showLoginError()
+    }
+
     private fun login(email: String = "email@wp.pl", password: String = "password") {
-        LoginController(api,view).login(email, password)
+        LoginController(api, view).login(email, password)
     }
 }
 
 interface Login {
     interface Api {
-        fun login(email: String, password: String) : Completable
+        fun login(email: String, password: String): Completable
     }
 
     interface View {
         fun showEmptyEmailError()
         fun showLoader()
         fun openHomeScreen()
+        fun showLoginError()
     }
 }
 
 class LoginController(private val api: Login.Api, private val view: Login.View) {
     fun login(email: String, password: String) {
         if (email.isNotEmpty() && password.isNotEmpty()) {
-            api.login(email, password).subscribe{
-                view.openHomeScreen()
-            }
+            api.login(email, password)
+                    .subscribe(this::handleSuccess, this::handleError)
             view.showLoader()
         }
 
         if (email.isEmpty()) {
             view.showEmptyEmailError()
         }
+    }
+
+    private fun handleError(t: Throwable) {
+        view.showLoginError()
+    }
+
+    private fun handleSuccess() {
+        view.openHomeScreen()
     }
 }
