@@ -20,7 +20,7 @@ class LoginActivityTest {
     @Test
     fun should_show_email_input() {
         onId(R.id.emailInput)
-                .typeText("test@mail.com")
+                .replaceText("test@mail.com")
                 .hasText("test@mail.com")
     }
 }
