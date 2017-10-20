@@ -26,11 +26,6 @@ class LoginControllerTest {
         verify(api, never()).login(any(), any())
     }
 
-    private fun login(email: String = "email@wp.pl", password: String = "passwd") {
-        whenever(api.login(any(), any())).thenReturn(loginSubject)
-        LoginController(api, view).login(email, password)
-    }
-
     @Test
     fun `Login with password and email`() {
         val email = "email@email.com"
@@ -63,6 +58,11 @@ class LoginControllerTest {
         login()
         loginSubject.onError(Throwable())
         verify(view).showError()
+    }
+
+    private fun login(email: String = "email@wp.pl", password: String = "passwd") {
+        whenever(api.login(any(), any())).thenReturn(loginSubject)
+        LoginController(api, view).login(email, password)
     }
 }
 
