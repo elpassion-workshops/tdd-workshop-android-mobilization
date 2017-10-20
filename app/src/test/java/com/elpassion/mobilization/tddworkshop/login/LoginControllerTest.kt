@@ -14,7 +14,7 @@ class LoginControllerTest {
     }
     private val view = mock<Login.View>()
     private val navigator = mock<Navigator>()
-    private val repository: Repository = mock<Repository>()
+    private val repository = mock<Repository>()
 
     @Test
     fun `Call api on login`() {
@@ -119,10 +119,7 @@ interface Login {
         fun showError()
     }
 
-    data class User(val userName: String, val userLastName: String) {
-
-
-    }
+    data class User(val userName: String, val userLastName: String)
 
 }
 interface Navigator {
