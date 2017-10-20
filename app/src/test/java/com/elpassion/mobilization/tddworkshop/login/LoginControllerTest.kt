@@ -44,6 +44,12 @@ class LoginControllerTest {
         verify(view).showLoader()
     }
 
+    @Test
+    fun `Hide loader after calling login`(){
+        login()
+        verify(view).hideLoader()
+    }
+
     private fun login(email: String = "email", password: String="password") {
         LoginController(api,view).login(email, password)
     }
@@ -56,6 +62,7 @@ interface Login {
 
     interface View {
         fun showLoader()
+        fun hideLoader()
     }
 }
 
@@ -65,6 +72,7 @@ class LoginController(private val api: Login.Api, private val view : Login.View)
         if (email.isNotEmpty() && password.isNotEmpty()) {
             view.showLoader()
             api.login(email, password)
+            view.hideLoader()
         }
     }
 }
