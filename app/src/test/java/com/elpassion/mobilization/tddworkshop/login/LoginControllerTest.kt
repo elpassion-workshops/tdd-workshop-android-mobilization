@@ -69,7 +69,7 @@ class LoginControllerTest {
     }
 
     @Test
-    fun `Not show dashboard when login failed`() {
+    fun `Not show dashboard when login in progress`() {
         login()
         verify(view, never()).showDashboardView()
     }
