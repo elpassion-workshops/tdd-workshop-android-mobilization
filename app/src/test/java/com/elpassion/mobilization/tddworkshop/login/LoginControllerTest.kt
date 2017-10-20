@@ -48,13 +48,6 @@ class LoginControllerTest {
     }
 
     @Test
-    fun `Show Home screen after login success`() {
-        login()
-        loginCallSubject.onComplete()
-        verify(view).openHomeScreen()
-    }
-
-    @Test
     fun `Not show home screen if user data are empty`() {
         login("", "")
         verify(view, never()).openHomeScreen()
@@ -71,6 +64,13 @@ class LoginControllerTest {
         login()
         loginCallSubject.onError(RuntimeException())
         verify(view).showLoginError()
+    }
+
+    @Test
+    fun `Show Home screen after login success`() {
+        login()
+        loginCallSubject.onComplete()
+        verify(view).openHomeScreen()
     }
 
     private fun login(email: String = "email@wp.pl", password: String = "password") {
