@@ -39,5 +39,12 @@ class LoginActivityTest {
         onId(R.id.passwordHeader)
                 .hasText(R.string.password_header)
     }
+
+    @Test
+    fun should_show_password_input() {
+        onId(R.id.passwordInput)
+                .replaceText("password")
+                .hasText("password")
+    }
 }
 
