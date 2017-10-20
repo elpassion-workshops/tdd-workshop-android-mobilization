@@ -8,8 +8,12 @@ import io.reactivex.subjects.SingleSubject
 import org.junit.Test
 
 class LoginControllerTest {
+    companion object {
+        private val USER_EMAIL = "email@wp.pl"
+        private val USER_PASSWORD = "password"
+    }
 
-    private val user = User("email@o.pl", "abcdefg")
+    private val user = User(USER_EMAIL, USER_PASSWORD)
     private val loginCallSubject = SingleSubject.create<User>()
     private val repository = mock<Login.Repository>()
     private val api = mock<Login.Api>().apply {
@@ -82,7 +86,7 @@ class LoginControllerTest {
         verify(repository).saveUserToken(any<User>())
     }
 
-    private fun login(email: String = "email@wp.pl", password: String = "password") {
+    private fun login(email: String = USER_EMAIL, password: String = USER_PASSWORD) {
         LoginController(api, view, repository).login(email, password)
     }
 }
