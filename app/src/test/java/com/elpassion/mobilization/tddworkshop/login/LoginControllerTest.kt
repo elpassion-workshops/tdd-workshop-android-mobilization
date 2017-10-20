@@ -39,6 +39,12 @@ class LoginControllerTest {
         verify(view).showLoader()
     }
 
+    @Test
+    fun `Show next screen when api request returned success`() {
+        login()
+        verify(view).showAfterLoginScreen()
+    }
+
     private fun login(email: String = "email@wp.pl", password: String = "testPassword") {
         LoginController(api, view).login(email, password)
     }
@@ -51,6 +57,7 @@ interface Login {
 
     interface View {
         fun showLoader()
+        fun showAfterLoginScreen()
     }
 }
 
@@ -61,6 +68,9 @@ class LoginController(private val api: Login.Api, private val view : Login.View)
         if (email.isNotEmpty() && password.isNotEmpty()) {
             api.login(email, password)
             view.showLoader()
+            view.showAfterLoginScreen()
         }
+
+
     }
 }
