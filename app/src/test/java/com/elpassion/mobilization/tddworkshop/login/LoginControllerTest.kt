@@ -46,6 +46,12 @@ class LoginControllerTest {
         verify(view).showLoader()
     }
 
+    @Test
+    fun `Not show loader when email are empty`() {
+        login(email = "")
+        verify(view, never()).showLoader()
+    }
+
     private fun login(email: String = "email@wp.pl", password: String = "password") {
         LoginController(api, view).login(email, password)
     }
@@ -63,8 +69,8 @@ interface Login {
 
 class LoginController(private val api: Login.Api, private val view: Login.View) {
     fun login(email: String, password: String) {
-        view.showLoader()
         if (email.isNotEmpty() && password.isNotEmpty()) {
+            view.showLoader()
             api.login(email, password)
         }
 
