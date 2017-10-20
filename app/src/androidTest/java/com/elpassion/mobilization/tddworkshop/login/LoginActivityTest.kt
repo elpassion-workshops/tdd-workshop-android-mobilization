@@ -7,14 +7,21 @@ import android.text.InputType.TYPE_CLASS_TEXT
 import android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
 import com.elpassion.android.commons.espresso.*
 import com.elpassion.mobilization.tddworkshop.R
+import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockito_kotlin.verify
 import org.junit.Rule
 import org.junit.Test
 
 class LoginActivityTest {
 
-    @JvmField
-    @Rule
-    val rule = ActivityTestRule<LoginActivity>(LoginActivity::class.java)
+    val api = mock<Login.Api>()
+
+    @Rule @JvmField
+    val rule = object : ActivityTestRule<LoginActivity>(LoginActivity::class.java) {
+        override fun beforeActivityLaunched() {
+            LoginActivity.api = api
+        }
+    }
 
     @Test
     fun should_show_email_header() {
@@ -44,6 +51,14 @@ class LoginActivityTest {
         onId(R.id.passwordInput)
                 .replaceText("pass")
                 .hasText("pass")
+    }
+
+    @Test
+    fun Call_api_with_provded_email_and_password_on_login_click() {
+        onId(R.id.emailInput).replaceText("test@test.com")
+        onId(R.id.passwordInput).replaceText("test@test.com")
+        onId(R.id.loginButton).click()
+        verify(api).login("test@test.com", "test@test.com")
     }
 }
 
