@@ -69,7 +69,7 @@ class LoginControllerTest {
     }
 
     @Test
-    fun `Hide loader when request success`(){
+    fun `Hide loader when request success`() {
         login()
         apiSubject.onComplete()
         verify(view).hideLoader()
@@ -109,14 +109,14 @@ class LoginController(private val api: Login.Api, private val view: Login.View, 
 
         if (email.isNotEmpty() && password.isNotEmpty()) {
             api.login(email, password)
+                    .doOnSubscribe { view.showLoader() }
+                    .doFinally { view.hideLoader() }
                     .subscribeOn(ioScheduler)
                     .subscribe({
                         view.showAfterLoginScreen()
-                        view.hideLoader()
                     }, {
                         view.showError()
                     })
-            view.showLoader()
         }
     }
 }
