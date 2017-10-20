@@ -2,14 +2,15 @@
 
 package com.elpassion.mobilization.tddworkshop.login
 
-import com.nhaarman.mockito_kotlin.mock
-import com.nhaarman.mockito_kotlin.never
-import com.nhaarman.mockito_kotlin.verify
+import com.nhaarman.mockito_kotlin.*
+import io.reactivex.Completable
+import io.reactivex.subjects.CompletableSubject
 import org.junit.Test
 
 class LoginControllerTest {
 
-    private val api = mock<Login.Api>()
+    private val completableSubject = CompletableSubject.create()
+    private val api = mock<Login.Api>().apply { whenever(login(any(), any())).thenReturn(completableSubject) }
     private val view = mock<Login.View>()
 
     @Test
@@ -63,7 +64,14 @@ class LoginControllerTest {
     @Test
     fun `Show dashboard when login success`() {
         login()
+        completableSubject.onComplete()
         verify(view).showDashboardView()
+    }
+
+    @Test
+    fun `Not show dashboard when login failed`() {
+        login()
+        verify(view, never()).showDashboardView()
     }
 
     private fun login(email: String = "email@wp.pl", password: String = "password") {
@@ -75,7 +83,7 @@ class LoginControllerTest {
 
 interface Login {
     interface Api {
-        fun login(email: String, password: String)
+        fun login(email: String, password: String): Completable
     }
 
     interface View {
@@ -94,8 +102,8 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
             password.isEmpty() -> view.setPasswordErrorMessage()
             else -> {
                 view.showProgressView()
-                api.login("email@wp.pl", "password")
-                view.showDashboardView()
+                api.login("email@wp.pl", "password").subscribe{ view.showDashboardView() }
+
             }
         }
     }
