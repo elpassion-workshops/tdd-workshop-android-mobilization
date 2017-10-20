@@ -30,8 +30,10 @@ class LoginControllerTest {
 
     @Test
     fun `Login with password and email`() {
-        login()
-        verify(api).login(any(), any())
+        val email = "email@email.com"
+        val password = "passwd"
+        login(email, password)
+        verify(api).login(email, password)
     }
 }
 
