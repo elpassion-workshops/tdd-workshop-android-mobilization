@@ -18,6 +18,7 @@ class LoginActivity : Activity() {
     }
 
     fun doLogin(view: View) {
+        loadingBar.visibility = View.VISIBLE
         api.login(emailInput.text.toString(), passwordInput.text.toString())
     }
 }

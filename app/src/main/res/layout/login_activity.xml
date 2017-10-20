@@ -32,5 +32,13 @@
         android:layout_height="wrap_content"
         android:onClick="doLogin"/>
 
+
+    <TextView
+        android:id="@+id/loadingBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/loading"
+        android:visibility="gone"/>
+
 </LinearLayout>
 

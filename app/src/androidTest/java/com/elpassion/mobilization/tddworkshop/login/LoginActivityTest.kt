@@ -63,6 +63,15 @@ class LoginActivityTest {
         verify(api).login("mock@email.com","mockPassword")
     }
 
+    @Test
+    fun should_show_loader_on_login_button(){
+        onId(R.id.emailInput).replaceText("mock@email.com")
+        onId(R.id.passwordInput).replaceText("mockPassword")
+        onId(R.id.continueButton).click()
+
+        onText(R.string.loading).isDisplayed()
+    }
+
     private fun shouldShowHeader(id: Int) {
         onText(id).isDisplayed()
     }
