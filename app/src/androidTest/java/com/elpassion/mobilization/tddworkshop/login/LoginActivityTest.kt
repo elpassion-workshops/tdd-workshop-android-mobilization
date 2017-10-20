@@ -56,5 +56,11 @@ class LoginActivityTest {
     fun should_hide_loader_on_start() {
         onId(R.id.loader).isNotDisplayed()
     }
+
+    @Test
+    fun shouldShowLoginButton() {
+        onId(R.id.loginButton).isDisplayed()
+    }
+
 }
 
