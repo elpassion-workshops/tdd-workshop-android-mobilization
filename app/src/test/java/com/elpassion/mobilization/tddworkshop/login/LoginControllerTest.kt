@@ -47,21 +47,14 @@ class LoginControllerTest {
     }
 
     @Test
-    fun `Not show loader when email is empty`() {
-        login(email = "")
-        verify(view, never()).showLoader()
-    }
-
-    @Test
-    fun `Not show loader when password is empty`() {
-        login(password = "")
+    fun `Not show loader when not calling api`() {
+        login(email = "", password = "")
         verify(view, never()).showLoader()
     }
 
     @Test
     fun `Hide loader when api call is finished`() {
         login()
-        verify(api).login(any(), any())
         verify(view).hideLoader()
     }
 
