@@ -10,12 +10,6 @@ import org.junit.Test
 class LoginControllerTest {
 
     @Test
-    fun `Init test`() {
-        val api = mock<Login.Api>()
-        LoginController(api)
-    }
-
-    @Test
     fun `Call api on login`() {
         val api = mock<Login.Api>()
         LoginController(api).login()
