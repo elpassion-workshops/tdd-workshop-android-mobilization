@@ -47,8 +47,14 @@ class LoginControllerTest {
     }
 
     @Test
-    fun `Not show loader when email are empty`() {
+    fun `Not show loader when email is empty`() {
         login(email = "")
+        verify(view, never()).showLoader()
+    }
+
+    @Test
+    fun `Not show loader when password is empty`() {
+        login(password = "")
         verify(view, never()).showLoader()
     }
 
