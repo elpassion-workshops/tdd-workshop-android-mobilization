@@ -13,8 +13,6 @@ class LoginControllerTest {
     private val api = mock<Login.Api>().apply {
         whenever(login(any(), any())).thenReturn(subject)
     }
-
-
     private val view = mock<Login.View>()
 
     @Test
