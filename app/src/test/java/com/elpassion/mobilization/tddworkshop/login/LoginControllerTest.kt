@@ -111,6 +111,16 @@ class LoginControllerTest {
 
     }
 
+    @Test
+    fun `Check show dashboard is performed on UiThread`() {
+        val uiScheduler = TestScheduler()
+        login(uiScheduler = uiScheduler)
+
+        completableSubject.mockSuccess()
+        verify(view, never()).showDashboardView()
+        uiScheduler.triggerActions()
+        verify(view).showDashboardView()
+    }
 
     private fun login(email: String = "email@wp.pl", password: String = "password",
                       uiScheduler: Scheduler = Schedulers.trampoline(), ioScheduler: Scheduler = Schedulers.trampoline()) {
