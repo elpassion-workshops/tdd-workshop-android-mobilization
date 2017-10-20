@@ -2,9 +2,9 @@
 
 package com.elpassion.mobilization.tddworkshop.login
 
+import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.never
-import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.verify
 import org.junit.Test
 
@@ -15,30 +15,36 @@ class LoginControllerTest {
     @Test
     fun `Call api on login`() {
         login()
-        verify(api).login()
+        verify(api).login(any(), any())
     }
 
     @Test
     fun `Not call api if email is empty`() {
         login(email = "")
-        verify(api, never()).login()
+        verify(api, never()).login(any(), any())
     }
 
-    private fun login(email: String = "email@wp.pl") {
-        LoginController(api).login(email)
+    private fun login(email: String = "email@wp.pl", password: String = "passwd") {
+        LoginController(api).login(email, password)
+    }
+
+    @Test
+    fun `Login with password and email`() {
+        login()
+        verify(api).login(any(), any())
     }
 }
 
 interface Login {
     interface Api {
-        fun login()
+        fun login(email: String, password: String)
     }
 }
 
 class LoginController(private val api: Login.Api) {
-    fun login(email: String) {
+    fun login(email: String, password: String) {
         if (email.isNotEmpty()) {
-            api.login()
+            api.login(email, password)
         }
     }
 }
