@@ -10,16 +10,16 @@ import org.junit.Test
 
 class LoginControllerTest {
 
+    private val api = mock<Login.Api>()
+
     @Test
     fun `Call api on login`() {
-        val api = mock<Login.Api>()
         LoginController(api).login("emial@wp.pl")
         verify(api, times(1)).login()
     }
 
     @Test
     fun `Not call api if email is empty`() {
-        val api = mock<Login.Api>()
         LoginController(api).login(email = "")
         verify(api, never()).login()
     }
