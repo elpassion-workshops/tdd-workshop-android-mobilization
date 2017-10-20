@@ -3,13 +3,15 @@
 package com.elpassion.mobilization.tddworkshop.login
 
 import com.nhaarman.mockito_kotlin.*
-import io.reactivex.Completable
-import io.reactivex.subjects.CompletableSubject
+import io.reactivex.Single
+import io.reactivex.subjects.SingleSubject
 import org.junit.Test
 
 class LoginControllerTest {
 
-    private val loginCallSubject = CompletableSubject.create()
+    private val user = User("email@o.pl", "abcdefg")
+    private val loginCallSubject = SingleSubject.create<User>()
+    private val repository = mock<Login.Repository>()
     private val api = mock<Login.Api>().apply {
         whenever(this.login(any(), any())).thenReturn(loginCallSubject)
     }
@@ -69,18 +71,25 @@ class LoginControllerTest {
     @Test
     fun `Show Home screen after login success`() {
         login()
-        loginCallSubject.onComplete()
+        loginCallSubject.onSuccess(user)
         verify(view).openHomeScreen()
     }
 
+    @Test
+    fun `Save User token after login success`() {
+        login()
+        loginCallSubject.onSuccess(user)
+        verify(repository).saveUserToken(any<User>())
+    }
+
     private fun login(email: String = "email@wp.pl", password: String = "password") {
-        LoginController(api, view).login(email, password)
+        LoginController(api, view, repository).login(email, password)
     }
 }
 
 interface Login {
     interface Api {
-        fun login(email: String, password: String): Completable
+        fun login(email: String, password: String): Single<User>
     }
 
     interface View {
@@ -89,9 +98,13 @@ interface Login {
         fun openHomeScreen()
         fun showLoginError()
     }
+
+    interface Repository {
+        fun saveUserToken(user: User)
+    }
 }
 
-class LoginController(private val api: Login.Api, private val view: Login.View) {
+class LoginController(private val api: Login.Api, private val view: Login.View, private val repository: Login.Repository) {
     fun login(email: String, password: String) {
         if (email.isNotEmpty() && password.isNotEmpty()) {
             api.login(email, password)
@@ -108,7 +121,10 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
         view.showLoginError()
     }
 
-    private fun handleSuccess() {
+    private fun handleSuccess(user: User) {
+        repository.saveUserToken(user)
         view.openHomeScreen()
     }
 }
+
+data class User(val email: String, val token: String)
