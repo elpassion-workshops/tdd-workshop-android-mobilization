@@ -127,7 +127,6 @@ class LoginController(private val api: Login.Api, private val view: Login.View, 
             email.isEmpty() -> view.setEmailErrorMessage()
             password.isEmpty() -> view.setPasswordErrorMessage()
             else -> {
-
                 api.login(email, password).
                         doOnSubscribe { view.showProgressView() }.
                         doOnSuccess { repo.persistUserData(email, it) }.
@@ -136,8 +135,6 @@ class LoginController(private val api: Login.Api, private val view: Login.View, 
                         }, {
                             view.showLoginFailedMessage()
                         })
-
-
             }
         }
     }
