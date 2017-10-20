@@ -3,19 +3,20 @@
 package com.elpassion.mobilization.tddworkshop.login
 
 import com.nhaarman.mockito_kotlin.*
-import io.reactivex.Completable
-import io.reactivex.subjects.CompletableSubject
+import io.reactivex.Single
+import io.reactivex.subjects.SingleSubject
 import org.junit.Test
 
 class LoginControllerTest {
 
-    private val loginSubject = CompletableSubject.create()
+    private val loginSubject = SingleSubject.create<String>()
 
     private val api = mock<Login.Api>().apply {
         whenever(login(any(), any())).thenReturn(loginSubject)
     }
 
     private val view = mock<Login.View>()
+    private val repository = mock<Login.Repository>()
 
     @Test
     fun `Call api on login`() {
@@ -59,15 +60,19 @@ class LoginControllerTest {
     @Test
     fun `Hide loader when api call is finished`() {
         login()
-        loginSubject.onComplete()
+        endLoginWithSuccess()
         verify(view).hideLoader()
     }
 
     @Test
     fun `Show main screen after successful login`() {
         login()
-        loginSubject.onComplete()
+        endLoginWithSuccess()
         verify(view).openMainScreen()
+    }
+
+    private fun endLoginWithSuccess(token: String = "token") {
+        loginSubject.onSuccess(token)
     }
 
     @Test
@@ -84,14 +89,22 @@ class LoginControllerTest {
         verify(view).showError()
     }
 
+    @Test
+    fun `Persist authentication token`() {
+        login()
+        val token = "token"
+        endLoginWithSuccess(token)
+        verify(repository).saveToken(token)
+    }
+
     private fun login(email: String = "email@wp.pl", password: String = "password") {
-        LoginController(api, view).login(email, password)
+        LoginController(api, view, repository).login(email, password)
     }
 }
 
 interface Login {
     interface Api {
-        fun login(email: String, password: String): Completable
+        fun login(email: String, password: String): Single<String>
     }
 
     interface View {
@@ -100,15 +113,21 @@ interface Login {
         fun openMainScreen()
         fun showError()
     }
+
+    interface Repository {
+        fun saveToken(token: String)
+
+    }
 }
 
-class LoginController(private val api: Login.Api, private val view: Login.View) {
+class LoginController(private val api: Login.Api, private val view: Login.View, private val repository: Login.Repository) {
     fun login(email: String, password: String) {
         if (email.isNotEmpty() && password.isNotEmpty()) {
             view.showLoader()
             api.login(email, password).subscribe({
                 view.hideLoader()
                 view.openMainScreen()
+                repository.saveToken(it)
             }, {
                 view.hideLoader()
                 view.showError()
