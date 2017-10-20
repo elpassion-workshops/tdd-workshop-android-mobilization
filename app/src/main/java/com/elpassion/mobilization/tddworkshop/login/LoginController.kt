@@ -3,7 +3,12 @@ package com.elpassion.mobilization.tddworkshop.login
 import io.reactivex.Scheduler
 import io.reactivex.disposables.Disposable
 
-class LoginController(private val api: Login.Api, private val view: Login.View, private val repository: Login.Repository, private val ioScheduler: Scheduler, private val uiScheduler: Scheduler) {
+class LoginController(
+        private val api: Login.Api,
+        private val view: Login.View,
+        private val repository: Login.Repository,
+        private val ioScheduler: Scheduler,
+        private val uiScheduler: Scheduler) {
 
     private var disposable: Disposable? = null
 
