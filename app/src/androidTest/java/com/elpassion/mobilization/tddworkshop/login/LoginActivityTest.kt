@@ -38,6 +38,12 @@ class LoginActivityTest {
         onText(R.string.password_header).isDisplayed()
     }
 
+    @Test
+    fun should_show_password_input() {
+        onId(R.id.passwordInput)
+                .replaceText("1234asd")
+                .hasText("1234asd")
+    }
 
     @Test
     fun should_password_input_has_type_masked() {
