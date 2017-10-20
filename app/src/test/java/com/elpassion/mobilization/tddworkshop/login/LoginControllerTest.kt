@@ -57,6 +57,13 @@ class LoginControllerTest {
         login()
         verify(view, never()).hideLoader()
     }
+
+    @Test
+    fun `Should show error if API call will finish with onError callback`() {
+        login()
+        loginSubject.onError(Throwable())
+        verify(view).showError()
+    }
 }
 
 interface Login {
@@ -75,7 +82,7 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
     fun login(email: String, password: String) {
         view.showLoader()
         if (email.isNotEmpty() && password.isNotEmpty()) {
-            api.login(email, password).subscribe { onApiLoginCompleted() }
+            api.login(email, password).subscribe(this::onApiLoginCompleted, this::onApiLoginError)
         } else {
             view.showError()
         }
@@ -83,5 +90,9 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
 
     private fun onApiLoginCompleted() {
         view.hideLoader()
+    }
+
+    private fun onApiLoginError(error : Throwable){
+        view.showError()
     }
 }
