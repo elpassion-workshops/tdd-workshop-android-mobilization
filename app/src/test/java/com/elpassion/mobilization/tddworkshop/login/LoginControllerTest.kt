@@ -19,13 +19,13 @@ class LoginControllerTest {
 
     @Test
     fun `Not call api if email is empty`() {
-        login(email = "", password = "")
+        login(email = "")
         verify(api, never()).login()
     }
 
     @Test
     fun `Not call api if password is empty`(){
-        login(email = "mock@mock.test", password = "")
+        login(password = "")
         verify(api, never()).login()
     }
 
