@@ -134,6 +134,7 @@ class LoginController(private val api: Login.Api, private val view: Login.View, 
     fun login(email: String, password: String) {
         if (email.isNotEmpty() && password.isNotEmpty()) {
             api.login(email, password)
+                    .doAfterTerminate(view::hideLoader)
                     .subscribe(this::handleSuccess, this::handleError)
             view.showLoader()
         }
@@ -144,13 +145,11 @@ class LoginController(private val api: Login.Api, private val view: Login.View, 
     }
 
     private fun handleError(t: Throwable) {
-        view.hideLoader()
         view.showLoginError()
     }
 
     private fun handleSuccess(user: User) {
         repository.saveUserToken(user)
-        view.hideLoader()
         view.openHomeScreen()
     }
 }
