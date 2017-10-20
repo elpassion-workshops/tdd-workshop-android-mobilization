@@ -86,14 +86,21 @@ class LoginControllerTest {
         verify(repository).save(any<Login.User>())
     }
 
+    @Test
+    fun `Saved user object should have same data as api returned`() {
+        val user = Login.User("name", "lastName")
+        mockSuccessfulLoginAsyncEnd(user)
+        verify(repository).save(user)
+    }
+
     private fun mockErrorLoginAsyncAttempt() {
         login()
         subject.onError(Exception("Error"))
     }
 
-    private fun mockSuccessfulLoginAsyncEnd() {
+    private fun mockSuccessfulLoginAsyncEnd(user: Login.User = Login.User("", "")) {
         login()
-        subject.onSuccess(Login.User())
+        subject.onSuccess(user)
     }
 
     private fun login(email: String = "email", password: String = "password") {
@@ -112,7 +119,8 @@ interface Login {
         fun showError()
     }
 
-    class User {
+    data class User(val userName: String, val userLastName: String) {
+
 
     }
 
