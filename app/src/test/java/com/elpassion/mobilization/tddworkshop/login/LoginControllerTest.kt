@@ -85,8 +85,19 @@ class LoginControllerTest {
         verify(view).hideLoader()
     }
 
-    private fun login(email: kotlin.String = "email@wp.pl", password: kotlin.String = "testPassword", ioScheduler: Scheduler = trampoline()) {
-        LoginController(api, view, ioScheduler).login(email, password)
+    @Test
+    fun `Observe on given scheduler`(){
+        val uiScheduler = TestScheduler()
+        login(uiScheduler = uiScheduler)
+        apiSubject.onComplete()
+        verify(view, never()).hideLoader()
+        uiScheduler.triggerActions()
+        verify(view).hideLoader()
+    }
+
+    private fun login(email: kotlin.String = "email@wp.pl", password: kotlin.String = "testPassword",
+                      ioScheduler: Scheduler = trampoline(), uiScheduler: Scheduler = trampoline()) {
+        LoginController(api, view, ioScheduler, uiScheduler).login(email, password)
     }
 }
 
@@ -103,15 +114,17 @@ interface Login {
     }
 }
 
-class LoginController(private val api: Login.Api, private val view: Login.View, private val ioScheduler: Scheduler) {
+class LoginController(private val api: Login.Api, private val view: Login.View, private val ioScheduler: Scheduler,
+                      private val uiScheduler : Scheduler) {
 
     fun login(email: String, password: String) {
 
         if (email.isNotEmpty() && password.isNotEmpty()) {
             api.login(email, password)
+                    .subscribeOn(ioScheduler)
+                    .observeOn(uiScheduler)
                     .doOnSubscribe { view.showLoader() }
                     .doFinally { view.hideLoader() }
-                    .subscribeOn(ioScheduler)
                     .subscribe({
                         view.showAfterLoginScreen()
                     }, {
