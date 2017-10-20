@@ -2,15 +2,17 @@
 
 package com.elpassion.mobilization.tddworkshop.login
 
-import com.nhaarman.mockito_kotlin.any
-import com.nhaarman.mockito_kotlin.mock
-import com.nhaarman.mockito_kotlin.never
-import com.nhaarman.mockito_kotlin.verify
+import com.nhaarman.mockito_kotlin.*
+import io.reactivex.Completable
+import io.reactivex.subjects.CompletableSubject
 import org.junit.Test
 
 class LoginControllerTest {
 
-    private val api = mock<Login.Api>()
+    private val loginCallSubject = CompletableSubject.create()
+    private val api = mock<Login.Api>().apply {
+        whenever(this.login(any(), any())).thenReturn(loginCallSubject)
+    }
     private val view = mock<Login.View>()
 
     @Test
@@ -48,12 +50,19 @@ class LoginControllerTest {
     @Test
     fun `Show Home screen after login success`() {
         login()
+        loginCallSubject.onComplete()
         verify(view).openHomeScreen()
     }
 
     @Test
     fun `Not show home screen if user data are empty`() {
         login("", "")
+        verify(view, never()).openHomeScreen()
+    }
+
+    @Test
+    fun `Not show Home screem if call in progress`() {
+        login()
         verify(view, never()).openHomeScreen()
     }
 
@@ -64,7 +73,7 @@ class LoginControllerTest {
 
 interface Login {
     interface Api {
-        fun login(email: String, password: String)
+        fun login(email: String, password: String) : Completable
     }
 
     interface View {
@@ -77,9 +86,10 @@ interface Login {
 class LoginController(private val api: Login.Api, private val view: Login.View) {
     fun login(email: String, password: String) {
         if (email.isNotEmpty() && password.isNotEmpty()) {
-            api.login(email, password)
+            api.login(email, password).subscribe{
+                view.openHomeScreen()
+            }
             view.showLoader()
-            view.openHomeScreen()
         }
 
         if (email.isEmpty()) {
