@@ -71,6 +71,13 @@ class LoginControllerTest {
     }
 
     @Test
+    fun `Hide loader when login call failed`() {
+        login()
+        loginSubject.onError(RuntimeException())
+        verify(view).hideLoader()
+    }
+
+    @Test
     fun `Show error when login call failed`() {
         login()
         loginSubject.onError(RuntimeException())
@@ -103,6 +110,7 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
                 view.hideLoader()
                 view.openMainScreen()
             }, {
+                view.hideLoader()
                 view.showError()
             })
         }
