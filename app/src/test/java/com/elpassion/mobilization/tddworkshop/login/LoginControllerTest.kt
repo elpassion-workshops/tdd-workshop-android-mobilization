@@ -58,6 +58,12 @@ class LoginControllerTest {
         verify(view).hideLoader()
     }
 
+    @Test
+    fun `Show main screen after successful login`() {
+        login()
+        verify(view).openMainScreen()
+    }
+
     private fun login(email: String = "email@wp.pl", password: String = "password") {
         LoginController(api, view).login(email, password)
     }
@@ -71,6 +77,7 @@ interface Login {
     interface View {
         fun showLoader()
         fun hideLoader()
+        fun openMainScreen()
     }
 }
 
@@ -80,8 +87,7 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
             view.showLoader()
             api.login(email, password)
             view.hideLoader()
+            view.openMainScreen()
         }
-
-
     }
 }
