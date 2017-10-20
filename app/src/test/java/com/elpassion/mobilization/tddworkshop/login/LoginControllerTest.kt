@@ -93,6 +93,13 @@ class LoginControllerTest {
         verify(repository, never()).saveUserToken(any<User>())
     }
 
+    @Test
+    fun `Hide loader after login success`() {
+        login()
+        loginCallSubject.onSuccess(user)
+        verify(view).hideLoader()
+    }
+
     private fun login(email: String = USER_EMAIL, password: String = USER_PASSWORD) {
         LoginController(api, view, repository).login(email, password)
     }
@@ -106,6 +113,7 @@ interface Login {
     interface View {
         fun showEmptyEmailError()
         fun showLoader()
+        fun hideLoader()
         fun openHomeScreen()
         fun showLoginError()
     }
@@ -134,6 +142,7 @@ class LoginController(private val api: Login.Api, private val view: Login.View, 
 
     private fun handleSuccess(user: User) {
         repository.saveUserToken(user)
+        view.hideLoader()
         view.openHomeScreen()
     }
 }
