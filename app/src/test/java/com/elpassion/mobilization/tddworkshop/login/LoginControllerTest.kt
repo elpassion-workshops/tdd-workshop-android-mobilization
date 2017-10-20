@@ -58,7 +58,7 @@ class LoginControllerTest {
         verify(view, never()).hideLoader()
     }
 }
-o
+
 interface Login {
     interface Api {
         fun login(email: String, password: String): Completable
