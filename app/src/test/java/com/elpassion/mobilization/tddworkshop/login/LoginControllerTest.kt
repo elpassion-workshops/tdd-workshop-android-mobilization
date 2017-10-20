@@ -12,6 +12,8 @@ class LoginControllerTest {
 
     private val api = mock<Login.Api>()
 
+    private val view = mock<Login.View>()
+
     @Test
     fun `Call api on login`() {
         login()
@@ -38,8 +40,14 @@ class LoginControllerTest {
         verify(api).login(email, password)
     }
 
+    @Test
+    fun `Show loader on api call`() {
+        login()
+        verify(view).showLoader()
+    }
+
     private fun login(email: String = "email@wp.pl", password: String = "password") {
-        LoginController(api).login(email, password)
+        LoginController(api, view).login(email, password)
     }
 }
 
@@ -47,10 +55,15 @@ interface Login {
     interface Api {
         fun login(email: String, password: String)
     }
+
+    interface View {
+        fun showLoader()
+    }
 }
 
-class LoginController(private val api: Login.Api) {
+class LoginController(private val api: Login.Api, private val view: Login.View) {
     fun login(email: String, password: String) {
+        view.showLoader()
         if (email.isNotEmpty() && password.isNotEmpty()) {
             api.login(email, password)
         }
