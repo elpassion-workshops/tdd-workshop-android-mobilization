@@ -3,8 +3,7 @@ package com.elpassion.mobilization.tddworkshop.login
 import android.support.test.espresso.assertion.ViewAssertions.matches
 import android.support.test.espresso.matcher.ViewMatchers.withInputType
 import android.support.test.rule.ActivityTestRule
-import android.text.InputType.TYPE_CLASS_TEXT
-import android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+import android.text.InputType.*
 import com.elpassion.android.commons.espresso.*
 import com.elpassion.mobilization.tddworkshop.R
 import org.junit.Rule
@@ -37,6 +36,13 @@ class LoginActivityTest {
     @Test
     fun should_show_password_header() {
         onText(R.string.password_header).isDisplayed()
+    }
+
+
+    @Test
+    fun should_password_input_has_type_masked() {
+        onId(R.id.passwordInput)
+                .check(matches(withInputType(TYPE_CLASS_TEXT or TYPE_TEXT_VARIATION_PASSWORD)))
     }
 }
 
