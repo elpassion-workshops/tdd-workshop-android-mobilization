@@ -60,6 +60,13 @@ class LoginControllerTest {
         verify(view).showError()
     }
 
+    @Test
+    fun `Should Login Controller hide loader on error`() {
+        login()
+        loginSubject.onError(Throwable())
+        verify(view).hideLoader()
+    }
+
     private fun login(email: String = "email@wp.pl", password: String = "passwd") {
         whenever(api.login(any(), any())).thenReturn(loginSubject)
         LoginController(api, view).login(email, password)
@@ -92,7 +99,8 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
         view.hideLoader()
     }
 
-    private fun onApiLoginError(error : Throwable){
+    private fun onApiLoginError(error: Throwable) {
+        view.hideLoader()
         view.showError()
     }
 }
