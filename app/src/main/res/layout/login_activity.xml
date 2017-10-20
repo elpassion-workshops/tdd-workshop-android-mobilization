@@ -26,5 +26,12 @@
         android:layout_height="wrap_content"
         android:inputType="textPassword" />
 
+    <Button
+        android:layout_gravity="center"
+        android:layout_margin="8dp"
+        android:layout_width="wrap_content"
+        android:text="@string/login_button_label"
+        android:layout_height="wrap_content"/>
+
 </LinearLayout>
 

@@ -50,5 +50,11 @@ class LoginActivityTest {
         onId(R.id.passwordInput)
                 .check(matches(withInputType(TYPE_CLASS_TEXT or TYPE_TEXT_VARIATION_PASSWORD)))
     }
+
+    @Test
+    fun should_show_login_button() {
+        onText(R.string.login_button_label).isDisplayed()
+    }
+
 }
 
