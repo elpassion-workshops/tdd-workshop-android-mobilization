@@ -3,15 +3,16 @@
 package com.elpassion.mobilization.tddworkshop.login
 
 import com.nhaarman.mockito_kotlin.*
-import io.reactivex.Completable
-import io.reactivex.subjects.CompletableSubject
+import io.reactivex.Single
+import io.reactivex.subjects.SingleSubject
 import org.junit.Test
 
 class LoginControllerTest {
 
-    private val completableSubject = CompletableSubject.create()
+    private val completableSubject = SingleSubject.create<String>()
     private val api = mock<Login.Api>().apply { whenever(login(any(), any())).thenReturn(completableSubject) }
     private val view = mock<Login.View>()
+    private val repo = mock<Repo>()
 
     @Test
     fun `Call api on login`() {
@@ -64,7 +65,7 @@ class LoginControllerTest {
     @Test
     fun `Show dashboard when login success`() {
         login()
-        completableSubject.onComplete()
+        completableSubject.mockSuccess()
         verify(view).showDashboardView()
     }
 
@@ -88,15 +89,22 @@ class LoginControllerTest {
         verify(view).showLoginFailedMessage()
     }
 
+    @Test
+    fun `Persist user data`() {
+        login(email = "test@test.te")
+        completableSubject.mockSuccess()
+        verify(repo).persistUserData(email = "test@test.te", token = "token")
+    }
+
     private fun login(email: String = "email@wp.pl", password: String = "password") {
-        LoginController(api, view).login(email, password)
+        LoginController(api, view, repo).login(email, password)
     }
 
 }
 
 interface Login {
     interface Api {
-        fun login(email: String, password: String): Completable
+        fun login(email: String, password: String): Single<String>
     }
 
     interface View {
@@ -108,16 +116,23 @@ interface Login {
     }
 }
 
+interface Repo {
+    fun persistUserData(email: String, token: String)
+}
 
-class LoginController(private val api: Login.Api, private val view: Login.View) {
+
+class LoginController(private val api: Login.Api, private val view: Login.View, private val repo: Repo) {
     fun login(email: String, password: String) {
         when {
             email.isEmpty() -> view.setEmailErrorMessage()
             password.isEmpty() -> view.setPasswordErrorMessage()
             else -> {
                 view.showProgressView()
-                api.login("email@wp.pl", "password").subscribe(
-                        { view.showDashboardView() },
+                api.login(email, password).subscribe(
+                        { token ->
+                            repo.persistUserData(email, token)
+                            view.showDashboardView()
+                        },
                         { _ -> view.showLoginFailedMessage() })
 
             }
@@ -125,6 +140,10 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
     }
 }
 
-private fun CompletableSubject.mockError() {
+private fun <T> SingleSubject<T>.mockError() {
     this.onError(RuntimeException())
+}
+
+private fun SingleSubject<String>.mockSuccess() {
+    this.onSuccess("token")
 }
