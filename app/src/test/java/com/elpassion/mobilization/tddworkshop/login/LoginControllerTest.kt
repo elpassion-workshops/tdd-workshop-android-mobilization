@@ -4,6 +4,12 @@ package com.elpassion.mobilization.tddworkshop.login
 
 import com.nhaarman.mockito_kotlin.*
 import io.reactivex.Completable
+import io.reactivex.Scheduler
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.internal.schedulers.IoScheduler
+import io.reactivex.schedulers.Schedulers
+import io.reactivex.schedulers.Schedulers.trampoline
+import io.reactivex.schedulers.TestScheduler
 import io.reactivex.subjects.CompletableSubject
 import org.junit.Test
 
@@ -66,14 +72,24 @@ class LoginControllerTest {
     }
 
     @Test
-    fun `Hide loader when request success `(){
+    fun `Hide loader when request success`(){
         login()
         apiSubject.onComplete()
         verify(view).hideLoader()
     }
 
-    private fun login(email: String = "email@wp.pl", password: String = "testPassword") {
-        LoginController(api, view).login(email, password)
+    @Test
+    fun `Subscribe on given scheduler`() {
+        val ioScheduler = TestScheduler()
+        login(ioScheduler = ioScheduler)
+        apiSubject.onComplete()
+        verify(view, never()).hideLoader()
+        ioScheduler.triggerActions()
+        verify(view).hideLoader()
+    }
+
+    private fun login(email: kotlin.String = "email@wp.pl", password: kotlin.String = "testPassword", ioScheduler: Scheduler = trampoline()) {
+        LoginController(api, view, ioScheduler).login(email, password)
     }
 }
 
@@ -90,12 +106,13 @@ interface Login {
     }
 }
 
-class LoginController(private val api: Login.Api, private val view: Login.View) {
+class LoginController(private val api: Login.Api, private val view: Login.View, private val ioScheduler: Scheduler) {
 
     fun login(email: String, password: String) {
 
         if (email.isNotEmpty() && password.isNotEmpty()) {
             api.login(email, password)
+                    .subscribeOn(ioScheduler)
                     .subscribe({
                         view.showAfterLoginScreen()
                         view.hideLoader()
