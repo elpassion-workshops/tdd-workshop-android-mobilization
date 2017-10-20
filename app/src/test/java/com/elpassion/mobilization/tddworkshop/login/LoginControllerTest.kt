@@ -127,10 +127,16 @@ class LoginController(private val api: Login.Api, private val view: Login.View, 
                     .doOnSubscribe { view.showLoader() }
                     .doFinally { view.hideLoader() }
                     .doOnSuccess { repository.saveToken(it) }
-                    .subscribe(onSuccess, onError)
+                    .subscribe(this::onSuccess, this::onError)
 
         }
     }
-    private val onSuccess: (String) -> Unit = { view.openMainScreen() }
-    private val onError: (Throwable) -> Unit = { view.showError() }
+
+    private fun onSuccess(token: String) {
+        view.openMainScreen()
+    }
+
+    private fun onError(e: Throwable) {
+        view.showError()
+    }
 }
