@@ -89,5 +89,12 @@ class LoginActivityTest {
         onId(R.id.loginButton).click()
         verify(api).login(email, password)
     }
+
+    @Test
+    fun should_loader_be_displayed_until_login_call_is_not_finished() {
+        onId(R.id.loginButton).click()
+        onId(R.id.loader).isDisplayed()
+
+    }
 }
 
