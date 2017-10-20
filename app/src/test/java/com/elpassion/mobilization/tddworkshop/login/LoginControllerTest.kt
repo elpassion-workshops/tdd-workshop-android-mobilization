@@ -52,8 +52,7 @@ class LoginControllerTest {
 
     @Test
     fun `Hide loader after calling login`() {
-        login()
-        subject.onSuccess(Login.User())
+        mockSuccessfulLoginAsyncEnd()
         verify(view).hideLoader()
     }
 
@@ -65,31 +64,36 @@ class LoginControllerTest {
 
     @Test
     fun `Show error message when api returns error`() {
-        login()
-        subject.onError(Exception("Error"))
+        mockErrorLoginAsyncAttempt()
         verify(view).showError()
     }
 
     @Test
     fun `Hide loader on api Error`() {
-        login()
-        subject.onError(Exception("Error"))
+        mockErrorLoginAsyncAttempt()
         verify(view).hideLoader()
     }
 
-
     @Test
     fun `Open new screen on login success`() {
-        login()
-        subject.onSuccess(Login.User())
+        mockSuccessfulLoginAsyncEnd()
         verify(navigator).openHome()
     }
 
     @Test
     fun `Save user to repository after succeed`() {
+        mockSuccessfulLoginAsyncEnd()
+        verify(repository).save(any<Login.User>())
+    }
+
+    private fun mockErrorLoginAsyncAttempt() {
+        login()
+        subject.onError(Exception("Error"))
+    }
+
+    private fun mockSuccessfulLoginAsyncEnd() {
         login()
         subject.onSuccess(Login.User())
-        verify(repository).save(any<Login.User>())
     }
 
     private fun login(email: String = "email", password: String = "password") {
