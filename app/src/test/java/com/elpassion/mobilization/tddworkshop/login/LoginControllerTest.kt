@@ -3,7 +3,10 @@
 package com.elpassion.mobilization.tddworkshop.login
 
 import com.nhaarman.mockito_kotlin.*
+import io.reactivex.Scheduler
 import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
+import io.reactivex.schedulers.TestScheduler
 import io.reactivex.subjects.SingleSubject
 import org.junit.Test
 
@@ -97,8 +100,18 @@ class LoginControllerTest {
         verify(repository).saveToken(token)
     }
 
-    private fun login(email: String = "email@wp.pl", password: String = "password") {
-        LoginController(api, view, repository).login(email, password)
+    @Test
+    fun `Api should be called on provided scheduler`() {
+        val testScheduler = TestScheduler()
+        login(ioScheduler =  testScheduler)
+        loginSubject.onSuccess("token")
+        verify(view, never()).openMainScreen()
+        testScheduler.triggerActions()
+        verify(view).openMainScreen()
+    }
+
+    private fun login(email: String = "email@wp.pl", password: String = "password", ioScheduler : Scheduler = Schedulers.trampoline()) {
+        LoginController(api, view, repository, ioScheduler).login(email, password)
     }
 }
 
@@ -120,10 +133,11 @@ interface Login {
     }
 }
 
-class LoginController(private val api: Login.Api, private val view: Login.View, private val repository: Login.Repository) {
+class LoginController(private val api: Login.Api, private val view: Login.View, private val repository: Login.Repository, private val ioScheduler: Scheduler) {
     fun login(email: String, password: String) {
         if (email.isNotEmpty() && password.isNotEmpty()) {
             api.login(email, password)
+                    .subscribeOn(ioScheduler)
                     .doOnSubscribe { view.showLoader() }
                     .doFinally { view.hideLoader() }
                     .doOnSuccess { repository.saveToken(it) }
