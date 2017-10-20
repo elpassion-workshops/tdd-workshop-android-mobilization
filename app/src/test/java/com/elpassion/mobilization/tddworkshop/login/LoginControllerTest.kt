@@ -58,6 +58,13 @@ class LoginControllerTest {
         verify(view, never()).showAfterLoginScreen()
     }
 
+    @Test
+    fun `Show error screen on api request error status`() {
+        login()
+        apiSubject.onError(RuntimeException())
+        verify(view).showError()
+    }
+
     private fun login(email: String = "email@wp.pl", password: String = "testPassword") {
         LoginController(api, view).login(email, password)
     }
@@ -71,6 +78,7 @@ interface Login {
     interface View {
         fun showLoader()
         fun showAfterLoginScreen()
+        fun showError()
     }
 }
 
@@ -79,9 +87,13 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
     fun login(email: String, password: String) {
 
         if (email.isNotEmpty() && password.isNotEmpty()) {
-            api.login(email, password).subscribe {
-                view.showAfterLoginScreen()
-            }
+            api.login(email, password)
+                    .subscribe({
+                        view.showAfterLoginScreen()
+                    }, {
+                        view.showError()
+                    })
+
             view.showLoader()
         }
     }
