@@ -51,6 +51,12 @@ class LoginControllerTest {
         verify(view).openHomeScreen()
     }
 
+    @Test
+    fun `Not show home screen if user data are empty`() {
+        login("", "")
+        verify(view, never()).openHomeScreen()
+    }
+
     private fun login(email: String = "email@wp.pl", password: String = "password") {
         LoginController(api,view).login(email, password)
     }
@@ -73,11 +79,11 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
         if (email.isNotEmpty() && password.isNotEmpty()) {
             api.login(email, password)
             view.showLoader()
+            view.openHomeScreen()
         }
 
         if (email.isEmpty()) {
             view.showEmptyEmailError()
         }
-        view.openHomeScreen()
     }
 }
