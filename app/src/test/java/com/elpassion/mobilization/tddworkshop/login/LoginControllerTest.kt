@@ -60,6 +60,12 @@ class LoginControllerTest {
         verify(view).setPasswordErrorMessage()
     }
 
+    @Test
+    fun `Show dashboard when login success`() {
+        login()
+        verify(view).showDashboardView()
+    }
+
     private fun login(email: String = "email@wp.pl", password: String = "password") {
         LoginController(api, view).login(email, password)
     }
@@ -76,6 +82,7 @@ interface Login {
         fun showProgressView()
         fun setEmailErrorMessage()
         fun setPasswordErrorMessage()
+        fun showDashboardView()
     }
 }
 
@@ -88,6 +95,7 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
             else -> {
                 view.showProgressView()
                 api.login("email@wp.pl", "password")
+                view.showDashboardView()
             }
         }
     }
