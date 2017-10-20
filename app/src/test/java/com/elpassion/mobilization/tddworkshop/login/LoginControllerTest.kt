@@ -12,6 +12,7 @@ class LoginControllerTest {
     private val api = mock<Login.Api>()
     private val view = mock<Login.View>()
     private val loginSubject = CompletableSubject.create()
+    private val repository = mock<Login.Repository>()
 
     @Test
     fun `Call api on login`() {
@@ -67,9 +68,16 @@ class LoginControllerTest {
         verify(view).hideLoader()
     }
 
+    @Test
+    fun `Should save received token when API login call is successful`() {
+        login()
+        loginSubject.onComplete()
+        verify(repository).save(any())
+    }
+
     private fun login(email: String = "email@wp.pl", password: String = "passwd") {
         whenever(api.login(any(), any())).thenReturn(loginSubject)
-        LoginController(api, view).login(email, password)
+        LoginController(api, view, repository).login(email, password)
     }
 }
 
@@ -83,9 +91,15 @@ interface Login {
         fun hideLoader()
         fun showError()
     }
+
+    interface Repository{
+        fun save(user : UserData)
+    }
 }
 
-class LoginController(private val api: Login.Api, private val view: Login.View) {
+data class UserData(val firstName : String = "", val lastName : String = "")
+
+class LoginController(private val api: Login.Api, private val view: Login.View, private val repository : Login.Repository) {
     fun login(email: String, password: String) {
         view.showLoader()
         if (email.isNotEmpty() && password.isNotEmpty()) {
@@ -96,6 +110,7 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
     }
 
     private fun onApiLoginCompleted() {
+        repository.save(UserData())
         view.hideLoader()
     }
 
