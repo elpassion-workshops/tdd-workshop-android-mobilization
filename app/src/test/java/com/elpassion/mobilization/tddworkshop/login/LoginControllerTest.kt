@@ -3,18 +3,18 @@
 package com.elpassion.mobilization.tddworkshop.login
 
 import com.nhaarman.mockito_kotlin.*
-import io.reactivex.Completable
-import io.reactivex.subjects.CompletableSubject
+import io.reactivex.Single
+import io.reactivex.subjects.SingleSubject
 import org.junit.Test
-
 class LoginControllerTest {
 
-    private val subject = CompletableSubject.create()
+    private val subject = SingleSubject.create<Login.User>()
     private val api = mock<Login.Api>().apply {
         whenever(login(any(), any())).thenReturn(subject)
     }
     private val view = mock<Login.View>()
     private val navigator = mock<Navigator>()
+    private val repository: Repository = mock<Repository>()
 
     @Test
     fun `Call api on login`() {
@@ -53,7 +53,7 @@ class LoginControllerTest {
     @Test
     fun `Hide loader after calling login`() {
         login()
-        subject.onComplete()
+        subject.onSuccess(Login.User())
         verify(view).hideLoader()
     }
 
@@ -77,22 +77,29 @@ class LoginControllerTest {
         verify(view).hideLoader()
     }
 
+
     @Test
     fun `Open new screen on login success`() {
         login()
-        subject.onComplete()
+        subject.onSuccess(Login.User())
         verify(navigator).openHome()
+    }
 
+    @Test
+    fun `Save user to repository after succeed`() {
+        login()
+        subject.onSuccess(Login.User())
+        verify(repository).save(any<Login.User>())
     }
 
     private fun login(email: String = "email", password: String = "password") {
-        LoginController(api, view, navigator).login(email, password)
+        LoginController(api, view, navigator,repository).login(email, password)
     }
 }
 
 interface Login {
     interface Api {
-        fun login(login: String, password: String): Completable
+        fun login(login: String, password: String): Single<User>
     }
 
     interface View {
@@ -100,13 +107,21 @@ interface Login {
         fun hideLoader()
         fun showError()
     }
-}
 
+    class User {
+
+    }
+
+}
 interface Navigator {
+
     fun openHome()
 }
+interface Repository {
+    fun save(user: Login.User)
+}
 
-class LoginController(private val api: Login.Api, private val view: Login.View, private val nav: Navigator) {
+class LoginController(private val api: Login.Api, private val view: Login.View, private val nav: Navigator, private val repo: Repository) {
     fun login(email: String, password: String) {
         if (email.isNotEmpty() && password.isNotEmpty()) {
             view.showLoader()
@@ -114,7 +129,8 @@ class LoginController(private val api: Login.Api, private val view: Login.View, 
                     .doAfterTerminate {
                         view.hideLoader()
                     }
-                    .subscribe({
+                    .subscribe({user ->
+                        repo.save(user)
                         nav.openHome()
                     }, { throwable ->
                         view.showError()
