@@ -123,15 +123,14 @@ interface Login {
 class LoginController(private val api: Login.Api, private val view: Login.View, private val repository: Login.Repository) {
     fun login(email: String, password: String) {
         if (email.isNotEmpty() && password.isNotEmpty()) {
-            view.showLoader()
-            api.login(email, password).subscribe({
-                view.hideLoader()
-                view.openMainScreen()
-                repository.saveToken(it)
-            }, {
-                view.hideLoader()
-                view.showError()
-            })
+            api.login(email, password)
+                    .doOnSubscribe { view.showLoader() }
+                    .doFinally { view.hideLoader() }
+                    .doOnSuccess { repository.saveToken(it) }
+                    .subscribe(onSuccess, onError)
+
         }
     }
+    private val onSuccess: (String) -> Unit = { view.openMainScreen() }
+    private val onError: (Throwable) -> Unit = { view.showError() }
 }
