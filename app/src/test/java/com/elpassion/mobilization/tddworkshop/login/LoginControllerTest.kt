@@ -2,15 +2,18 @@
 
 package com.elpassion.mobilization.tddworkshop.login
 
-import com.nhaarman.mockito_kotlin.any
-import com.nhaarman.mockito_kotlin.mock
-import com.nhaarman.mockito_kotlin.never
-import com.nhaarman.mockito_kotlin.verify
+import com.nhaarman.mockito_kotlin.*
+import io.reactivex.Completable
+import io.reactivex.subjects.CompletableSubject
 import org.junit.Test
 
 class LoginControllerTest {
 
-    private val api = mock<Login.Api>()
+    private val loginSubject = CompletableSubject.create()
+
+    private val api = mock<Login.Api>().apply {
+        whenever(login(any(), any())).thenReturn(loginSubject)
+    }
 
     private val view = mock<Login.View>()
 
@@ -52,15 +55,19 @@ class LoginControllerTest {
         verify(view, never()).showLoader()
     }
 
+
+
     @Test
     fun `Hide loader when api call is finished`() {
         login()
+        loginSubject.onComplete()
         verify(view).hideLoader()
     }
 
     @Test
     fun `Show main screen after successful login`() {
         login()
+        loginSubject.onComplete()
         verify(view).openMainScreen()
     }
 
@@ -71,7 +78,7 @@ class LoginControllerTest {
 
 interface Login {
     interface Api {
-        fun login(email: String, password: String)
+        fun login(email: String, password: String) : Completable
     }
 
     interface View {
@@ -85,9 +92,10 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
     fun login(email: String, password: String) {
         if (email.isNotEmpty() && password.isNotEmpty()) {
             view.showLoader()
-            api.login(email, password)
-            view.hideLoader()
-            view.openMainScreen()
+            api.login(email, password).subscribe {
+                view.hideLoader()
+                view.openMainScreen()
+            }
         }
     }
 }
