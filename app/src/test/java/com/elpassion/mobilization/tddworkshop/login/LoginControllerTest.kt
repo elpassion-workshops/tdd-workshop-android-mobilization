@@ -86,6 +86,13 @@ class LoginControllerTest {
         verify(repository).saveUserToken(any<User>())
     }
 
+    @Test
+    fun `Don't save token after login fails`() {
+        login()
+        loginCallSubject.onError(RuntimeException())
+        verify(repository, never()).saveUserToken(any<User>())
+    }
+
     private fun login(email: String = USER_EMAIL, password: String = USER_PASSWORD) {
         LoginController(api, view, repository).login(email, password)
     }
