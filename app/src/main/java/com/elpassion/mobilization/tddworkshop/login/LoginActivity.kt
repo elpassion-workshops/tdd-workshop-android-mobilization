@@ -11,7 +11,7 @@ class LoginActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.login_activity)
         loginButton.setOnClickListener {
-            api.login("","")
+            api.login(emailInput.text.toString(),passwordInput.text.toString())
         }
     }
 

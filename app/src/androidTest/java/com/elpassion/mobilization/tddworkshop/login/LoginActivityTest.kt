@@ -78,6 +78,16 @@ class LoginActivityTest {
         verify(api).login(any(), any())
     }
 
+    @Test
+    fun should_button_click_pass_values_from_email_and_password_inputs_to_api() {
+        val email = "email@email.com"
+        val password = "password"
 
+        onId(R.id.emailInput).replaceText(email)
+        onId(R.id.passwordInput).replaceText(password)
+
+        onId(R.id.loginButton).click()
+        verify(api).login(email, password)
+    }
 }
 
