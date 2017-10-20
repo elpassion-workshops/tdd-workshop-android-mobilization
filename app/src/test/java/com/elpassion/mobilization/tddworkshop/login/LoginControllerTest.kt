@@ -65,6 +65,13 @@ class LoginControllerTest {
         verify(view).showError()
     }
 
+    @Test
+    fun `Hide loader when request success `(){
+        login()
+        apiSubject.onComplete()
+        verify(view).hideLoader()
+    }
+
     private fun login(email: String = "email@wp.pl", password: String = "testPassword") {
         LoginController(api, view).login(email, password)
     }
@@ -79,6 +86,7 @@ interface Login {
         fun showLoader()
         fun showAfterLoginScreen()
         fun showError()
+        fun hideLoader()
     }
 }
 
@@ -90,10 +98,10 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
             api.login(email, password)
                     .subscribe({
                         view.showAfterLoginScreen()
+                        view.hideLoader()
                     }, {
                         view.showError()
                     })
-
             view.showLoader()
         }
     }
