@@ -15,31 +15,37 @@ class LoginControllerTest {
     @Test
     fun `Call api on login`() {
         login()
-        verify(api).login()
+        verify(api).login("email@wp.pl", "password")
     }
 
     @Test
     fun `Not call api if email is empty`() {
         login(email = "")
-        verify(api, never()).login()
+        verify(api, never()).login("email@wp.pl", "password")
     }
 
     @Test
     fun `Not call api if empty password`() {
         login(password = "")
-        verify(api, never()).login()
+        verify(api, never()).login("email@wp.pl", "password")
     }
 
     @Test
     fun `Not call api if email and password are empty`() {
         login(email = "", password = "")
-        verify(api, never()).login()
+        verify(api, never()).login("email@wp.pl", "password")
     }
 
     @Test
     fun `Show progress view on login action`() {
         login()
         verify(view).showProgressView()
+    }
+
+    @Test
+    fun `Check email and password passed to api`() {
+        login()
+        verify(api).login("email@wp.pl","password")
     }
 
     private fun login(email: String = "email@wp.pl", password: String = "password") {
@@ -51,7 +57,7 @@ class LoginControllerTest {
 
 interface Login {
     interface Api {
-        fun login()
+        fun login(email: String, password: String)
     }
 
     interface View {
@@ -64,7 +70,7 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
     fun login(email: String, password: String) {
         if (email.isNotEmpty() && password.isNotEmpty()) {
             view.showProgressView()
-            api.login()
+            api.login("email@wp.pl", "password")
         }
     }
 }
