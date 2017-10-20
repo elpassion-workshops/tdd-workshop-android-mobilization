@@ -5,6 +5,7 @@ package com.elpassion.mobilization.tddworkshop.login
 import com.nhaarman.mockito_kotlin.*
 import io.reactivex.Scheduler
 import io.reactivex.Single
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.schedulers.TestScheduler
 import io.reactivex.subjects.SingleSubject
@@ -122,10 +123,21 @@ class LoginControllerTest {
         verify(view).openMainScreen()
     }
 
+    @Test
+    fun `Should not show error when onDestroy during api call`() {
+        val ioScheduler = TestScheduler()
+        login(ioScheduler = ioScheduler).onDestroy()
+        ioScheduler.triggerActions()
+        loginSubject.onError(RuntimeException())
+        verify(view, never()).showError()
+    }
+
     private fun login(email: String = "email@wp.pl", password: String = "password",
                       ioScheduler: Scheduler = Schedulers.trampoline(),
-                      uiScheduler: Scheduler = Schedulers.trampoline()) {
-        LoginController(api, view, repository, ioScheduler, uiScheduler).login(email, password)
+                      uiScheduler: Scheduler = Schedulers.trampoline()): LoginController {
+        val loginController = LoginController(api, view, repository, ioScheduler, uiScheduler)
+        loginController.login(email, password)
+        return loginController
     }
 }
 
@@ -152,9 +164,12 @@ class LoginController(private val api: Login.Api,
                       private val repository: Login.Repository,
                       private val ioScheduler: Scheduler,
                       private val uiScheduler: Scheduler) {
+
+    private var disposable: Disposable? = null
+
     fun login(email: String, password: String) {
         if (email.isNotEmpty() && password.isNotEmpty()) {
-            api.login(email, password)
+             disposable = api.login(email, password)
                     .subscribeOn(ioScheduler)
                     .observeOn(uiScheduler)
                     .doOnSubscribe { view.showLoader() }
@@ -170,5 +185,9 @@ class LoginController(private val api: Login.Api,
 
     private fun onError(e: Throwable) {
         view.showError()
+    }
+
+    fun onDestroy() {
+        disposable?.dispose()
     }
 }
