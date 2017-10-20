@@ -45,10 +45,9 @@ class LoginControllerTest {
     }
 
     @Test
-    fun `Show error if email or password is empty`() {
-        val emptyPassword = ""
-        login(password = emptyPassword)
-        verify(view).showError()
+    fun `Controller should hide loader on view after successful API login call`() {
+        login()
+        verify(view).hideLoader()
     }
 }
 
@@ -59,6 +58,7 @@ interface Login {
 
     interface View {
         fun showLoader()
+        fun hideLoader()
         fun showError()
     }
 }
@@ -68,6 +68,7 @@ class LoginController(private val api: Login.Api, private val view: Login.View) 
         view.showLoader()
         if (email.isNotEmpty() && password.isNotEmpty()) {
             api.login(email, password)
+            view.hideLoader()
         } else {
             view.showError()
         }
