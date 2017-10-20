@@ -13,12 +13,6 @@ class LoginControllerTest {
     private val api = mock<Login.Api>()
 
     @Test
-    fun `Call api on login`() {
-        login()
-        verify(api).login(any(), any())
-    }
-
-    @Test
     fun `Not call api if email is empty`() {
         login(email = "")
         verify(api, never()).login(any(), any())
