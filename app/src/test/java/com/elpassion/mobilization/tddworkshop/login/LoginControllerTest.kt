@@ -42,25 +42,32 @@ class LoginControllerTest {
         login()
         verify(view).showLoader()
     }
+
+    @Test
+    fun `Show error if email or password is empty`() {
+        login(password = "")
+        verify(view).showError()
+    }
 }
-
-
 
 interface Login {
     interface Api {
         fun login(email: String, password: String)
     }
 
-    interface View{
+    interface View {
         fun showLoader()
+        fun showError()
     }
 }
 
-class LoginController(private val api: Login.Api, private val view : Login.View) {
+class LoginController(private val api: Login.Api, private val view: Login.View) {
     fun login(email: String, password: String) {
         if (email.isNotEmpty() && password.isNotEmpty()) {
             api.login(email, password)
             view.showLoader()
+        } else {
+            view.showError()
         }
     }
 }
