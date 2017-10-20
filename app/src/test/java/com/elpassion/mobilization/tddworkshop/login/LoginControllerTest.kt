@@ -58,7 +58,7 @@ interface Login {
 
 class LoginController(private val api: Login.Api, private val view : Login.View) {
     fun login(email: String, password: String) {
-        if (email.isNotEmpty()) {
+        if (email.isNotEmpty() && password.isNotEmpty()) {
             api.login(email, password)
             view.showLoader()
         }
