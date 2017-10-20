@@ -113,8 +113,8 @@ class LoginControllerTest {
 
 
     private fun login(email: String = "email@wp.pl", password: String = "password",
-                      mainThreadScheduler: Scheduler = Schedulers.trampoline(), ioScheduler: Scheduler = Schedulers.trampoline()) {
-        LoginController(api, view, repo, mainThreadScheduler, ioScheduler).login(email, password)
+                      uiScheduler: Scheduler = Schedulers.trampoline(), ioScheduler: Scheduler = Schedulers.trampoline()) {
+        LoginController(api, view, repo, uiScheduler, ioScheduler).login(email, password)
 
     }
 
