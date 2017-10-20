@@ -29,6 +29,12 @@ class LoginControllerTest {
         verify(api, never()).login()
     }
 
+    @Test
+    fun `Not call api if email and password are empty`() {
+        login(email = "", password = "")
+        verify(api, never()).login()
+    }
+
     private fun login(email: String = "email@wp.pl", password: String = "password") {
         LoginController(api).login(email, password)
     }
