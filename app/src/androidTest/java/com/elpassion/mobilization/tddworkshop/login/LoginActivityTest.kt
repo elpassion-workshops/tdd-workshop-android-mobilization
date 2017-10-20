@@ -18,8 +18,9 @@ class LoginActivityTest {
 
     @Test
     fun should_show_email_header() {
-        onText(R.string.email_header).isDisplayed()
+        shouldShowHeader(R.string.email_header)
     }
+
 
     @Test
     fun should_show_email_input() {
@@ -36,8 +37,11 @@ class LoginActivityTest {
 
     @Test
     fun should_show_password_header() {
-        onText(R.string.password_header).isDisplayed()
+        shouldShowHeader(R.string.password_header)
     }
 
+    private fun shouldShowHeader(id: Int) {
+        onText(id).isDisplayed()
+    }
 }
 
