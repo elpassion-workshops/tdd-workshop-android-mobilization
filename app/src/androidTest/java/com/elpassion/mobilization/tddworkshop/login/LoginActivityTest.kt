@@ -33,5 +33,10 @@ class LoginActivityTest {
         onId(R.id.emailInput)
                 .check(matches(withInputType(TYPE_CLASS_TEXT or TYPE_TEXT_VARIATION_EMAIL_ADDRESS)))
     }
+
+    @Test
+    fun should_show_password_header() {
+        onText(R.string.password_header).isDisplayed()
+    }
 }
 
