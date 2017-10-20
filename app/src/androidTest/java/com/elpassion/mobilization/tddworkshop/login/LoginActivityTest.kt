@@ -6,6 +6,8 @@ import android.support.test.rule.ActivityTestRule
 import android.text.InputType.*
 import com.elpassion.android.commons.espresso.*
 import com.elpassion.mobilization.tddworkshop.R
+import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockito_kotlin.verify
 import org.junit.Rule
 import org.junit.Test
 
@@ -13,12 +15,22 @@ class LoginActivityTest {
 
     @JvmField
     @Rule
-    val rule = ActivityTestRule<LoginActivity>(LoginActivity::class.java)
+    val rule = object: ActivityTestRule<LoginActivity>(LoginActivity::class.java){
+        override fun beforeActivityLaunched() {
+          LoginActivity.api = api
+        }
+    }
+
+    private val api = mock<Login.Api>()
+
+
 
     @Test
     fun should_show_email_header() {
         onText(R.string.email_header).isDisplayed()
     }
+
+    private val s = "test@mail.com"
 
     @Test
     fun should_show_email_input() {
@@ -54,6 +66,16 @@ class LoginActivityTest {
     @Test
     fun should_show_login_button() {
         onText(R.string.login_button_label).isDisplayed()
+    }
+
+    @Test
+    fun should_perform_login_action() {
+        val email = "test@mail.com"
+        val pass = "pass"
+        onId(R.id.emailInput).replaceText(email)
+        onId(R.id.passwordInput).replaceText(pass)
+        onText(R.string.login_button_label).click()
+        verify(api).login(email, pass)
     }
 
 }
